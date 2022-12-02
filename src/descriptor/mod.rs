@@ -32,7 +32,7 @@ use crate::miniscript::{Legacy, Miniscript, Segwitv0};
 use crate::prelude::*;
 use crate::{
     expression, hash256, miniscript, BareCtx, Error, ForEachKey, MiniscriptKey, Satisfier,
-    ToPublicKey, TranslatePk, Translator,
+    ToPublicKey, TranslateErr, TranslatePk, Translator,
 };
 
 mod bare;
@@ -525,7 +525,7 @@ where
     type Output = Descriptor<Q>;
 
     /// Converts a descriptor using abstract keys to one using specific keys.
-    fn translate_pk<T, E>(&self, t: &mut T) -> Result<Self::Output, E>
+    fn translate_pk<T, E>(&self, t: &mut T) -> Result<Self::Output, TranslateErr<E>>
     where
         T: Translator<P, Q, E>,
     {
@@ -587,7 +587,10 @@ impl Descriptor<DescriptorPublicKey> {
 
             translate_hash_clone!(DescriptorPublicKey, DescriptorPublicKey, ConversionError);
         }
-        self.translate_pk(&mut Derivator(index))
+        self.translate_pk(&mut Derivator(index)).map_err(|e| {
+            e.try_into_translator_err()
+                .expect("No Context errors while translating")
+        })
     }
 
     #[deprecated(note = "use at_derivation_index instead")]
@@ -705,9 +708,13 @@ impl Descriptor<DescriptorPublicKey> {
         }
 
         let descriptor = Descriptor::<String>::from_str(s)?;
-        let descriptor = descriptor
-            .translate_pk(&mut keymap_pk)
-            .map_err(|e| Error::Unexpected(e.to_string()))?;
+        let descriptor = descriptor.translate_pk(&mut keymap_pk).map_err(|e| {
+            Error::Unexpected(
+                e.try_into_translator_err()
+                    .expect("No Outer context errors")
+                    .to_string(),
+            )
+        })?;
 
         Ok((descriptor, keymap_pk.0))
     }
@@ -834,46 +841,13 @@ impl Descriptor<DescriptorPublicKey> {
 
         for (i, desc) in descriptors.iter_mut().enumerate() {
             let mut index_choser = IndexChoser(i);
-            *desc = desc.translate_pk(&mut index_choser)?;
+            *desc = desc.translate_pk(&mut index_choser).map_err(|e| {
+                e.try_into_translator_err()
+                    .expect("No Context errors possible")
+            })?;
         }
 
         Ok(descriptors)
-    }
-}
-
-impl<Pk: MiniscriptKey> Descriptor<Pk> {
-    /// Whether this descriptor is a multipath descriptor that contains any 2 multipath keys
-    /// with a different number of derivation paths.
-    /// Such a descriptor is invalid according to BIP389.
-    pub fn multipath_length_mismatch(&self) -> bool {
-        // (Ab)use `for_each_key` to record the number of derivation paths a multipath key has.
-        #[derive(PartialEq)]
-        enum MultipathLenChecker {
-            SinglePath,
-            MultipathLen(usize),
-            LenMismatch,
-        }
-
-        let mut checker = MultipathLenChecker::SinglePath;
-        self.for_each_key(|key| {
-            match key.num_der_paths() {
-                0 | 1 => {}
-                n => match checker {
-                    MultipathLenChecker::SinglePath => {
-                        checker = MultipathLenChecker::MultipathLen(n);
-                    }
-                    MultipathLenChecker::MultipathLen(len) => {
-                        if len != n {
-                            checker = MultipathLenChecker::LenMismatch;
-                        }
-                    }
-                    MultipathLenChecker::LenMismatch => {}
-                },
-            }
-            true
-        });
-
-        checker == MultipathLenChecker::LenMismatch
     }
 }
 
@@ -929,8 +903,14 @@ impl Descriptor<DefiniteDescriptorKey> {
             );
         }
 
-        let derived = self.translate_pk(&mut Derivator(secp))?;
-        Ok(derived)
+        let derived = self.translate_pk(&mut Derivator(secp));
+        match derived {
+            Ok(derived) => Ok(derived),
+            Err(e) => match e.try_into_translator_err() {
+                Ok(e) => Err(e),
+                Err(_) => unreachable!("No Context errors when deriving keys"),
+            },
+        }
     }
 }
 
@@ -963,10 +943,6 @@ impl_from_str!(
             let top = expression::Tree::from_str(desc_str)?;
             expression::FromTree::from_tree(&top)
         }?;
-
-        if desc.multipath_length_mismatch() {
-            return Err(Error::MultipathDescLenMismatch);
-        }
 
         Ok(desc)
     }
@@ -2103,7 +2079,6 @@ pk(03f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8))";
         // We can parse a multipath descriptors, and make it into separate single-path descriptors.
         let desc = Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/<7';8h;20>/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/<0;1;987>/*)))").unwrap();
         assert!(desc.is_multipath());
-        assert!(!desc.multipath_length_mismatch());
         assert_eq!(desc.into_single_descriptors().unwrap(), vec![
             Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/7'/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/0/*)))").unwrap(),
             Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/8h/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/1/*)))").unwrap(),
@@ -2113,7 +2088,6 @@ pk(03f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8))";
         // Even if only one of the keys is multipath.
         let desc = Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/<0;1>/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/*)))").unwrap();
         assert!(desc.is_multipath());
-        assert!(!desc.multipath_length_mismatch());
         assert_eq!(desc.into_single_descriptors().unwrap(), vec![
             Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/0/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/*)))").unwrap(),
             Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/1/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/*)))").unwrap(),
@@ -2122,7 +2096,6 @@ pk(03f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8))";
         // We can detect regular single-path descriptors.
         let notmulti_desc = Descriptor::from_str("wsh(andor(pk(tpubDEN9WSToTyy9ZQfaYqSKfmVqmq1VVLNtYfj3Vkqh67et57eJ5sTKZQBkHqSwPUsoSskJeaYnPttHe2VrkCsKA27kUaN9SDc5zhqeLz4jWQa/0'/*),older(10000),pk(tpubD8LYfn6njiA2inCoxwM7EuN3cuLVcaHAwLYeups13dpevd3nHLRdK9NdQksWXrhLQVxcUZRpnp5CkJ1FhE61WRAsHxDNAkvGkoQkAfgNRca/8/4567/*)))").unwrap();
         assert!(!notmulti_desc.is_multipath());
-        assert!(!notmulti_desc.multipath_length_mismatch());
         assert_eq!(
             notmulti_desc.clone().into_single_descriptors().unwrap(),
             vec![notmulti_desc]
