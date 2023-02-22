@@ -2,15 +2,13 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use actual_base64 as base64;
-use groestlcoin::consensus::serialize;
-use groestlcoin::util::sighash::SighashCache;
-use groestlcoin::{PackedLockTime, PrivateKey};
+use groestlcoin::sighash::SighashCache;
+use groestlcoin::PrivateKey;
 use miniscript::groestlcoin::consensus::encode::deserialize;
 use miniscript::groestlcoin::hashes::hex::FromHex;
-use miniscript::groestlcoin::util::psbt;
-use miniscript::groestlcoin::util::psbt::PartiallySignedTransaction as Psbt;
+use miniscript::groestlcoin::psbt::PartiallySignedTransaction as Psbt;
 use miniscript::groestlcoin::{
-    self, secp256k1, Address, Network, OutPoint, Script, Sequence, Transaction, TxIn, TxOut,
+    self, psbt, secp256k1, Address, Network, OutPoint, Script, Sequence, Transaction, TxIn, TxOut,
 };
 use miniscript::psbt::{PsbtExt, PsbtInputExt};
 use miniscript::Descriptor;
@@ -72,7 +70,7 @@ fn main() {
 
     let spend_tx = Transaction {
         version: 2,
-        lock_time: PackedLockTime(5000),
+        lock_time: bitcoin::absolute::LockTime::from_consensus(5000),
         input: vec![],
         output: vec![],
     };
@@ -91,11 +89,13 @@ fn main() {
     let hex_tx = "020000000001018ff27041f3d738f5f84fd5ee62f1c5b36afebfb15f6da0c9d1382ddd0eaaa23c0000000000feffffff02b3884703010000001600142ca3b4e53f17991582d47b15a053b3201891df5200e1f50500000000220020c0ebf552acd2a6f5dee4e067daaef17b3521e283aeaa44a475278617e3d2238a0247304402207b820860a9d425833f729775880b0ed59dd12b64b9a3d1ab677e27e4d6b370700220576003163f8420fe0b9dc8df726cff22cbc191104a2d4ae4f9dfedb087fcec72012103817e1da42a7701df4db94db8576f0e3605f3ab3701608b7e56f92321e4d8999100000000";
     let depo_tx: Transaction = deserialize(&Vec::<u8>::from_hex(hex_tx).unwrap()).unwrap();
 
-    let receiver = Address::from_str("grsrt1qsdks5za4t6sevaph6tz9ddfjzvhkdkxerp9276").unwrap();
+    let receiver = Address::from_str("grsrt1qsdks5za4t6sevaph6tz9ddfjzvhkdkxerp9276")
+        .unwrap()
+        .assume_checked();
 
     let amount = 100000000;
 
-    let (outpoint, witness_utxo) = get_vout(&depo_tx, bridge_descriptor.script_pubkey());
+    let (outpoint, witness_utxo) = get_vout(&depo_tx, &bridge_descriptor.script_pubkey());
 
     let mut txin = TxIn::default();
     txin.previous_output = outpoint;
@@ -132,7 +132,7 @@ fn main() {
         .to_secp_msg();
 
     // Fixme: Take a parameter
-    let hash_ty = groestlcoin::EcdsaSighashType::All;
+    let hash_ty = groestlcoin::sighash::EcdsaSighashType::All;
 
     let sk1 = backup1_private.inner;
     let sk2 = backup2_private.inner;
@@ -149,7 +149,7 @@ fn main() {
 
     psbt.inputs[0].partial_sigs.insert(
         pk1,
-        groestlcoin::EcdsaSig {
+        groestlcoin::ecdsa::Signature {
             sig: sig1,
             hash_ty: hash_ty,
         },
@@ -157,7 +157,7 @@ fn main() {
 
     println!("{:#?}", psbt);
 
-    let serialized = serialize(&psbt);
+    let serialized = psbt.serialize();
     println!("{}", base64::encode(&serialized));
 
     psbt.finalize_mut(&secp256k1).unwrap();
@@ -168,9 +168,9 @@ fn main() {
 }
 
 // Find the Outpoint by spk
-fn get_vout(tx: &Transaction, spk: Script) -> (OutPoint, TxOut) {
+fn get_vout(tx: &Transaction, spk: &Script) -> (OutPoint, TxOut) {
     for (i, txout) in tx.clone().output.into_iter().enumerate() {
-        if spk == txout.script_pubkey {
+        if spk == &txout.script_pubkey {
             return (OutPoint::new(tx.txid(), i as u32), txout);
         }
     }

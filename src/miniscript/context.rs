@@ -5,8 +5,7 @@ use core::{fmt, hash};
 #[cfg(feature = "std")]
 use std::error;
 
-use groestlcoin;
-use groestlcoin::blockdata::constants::MAX_BLOCK_WEIGHT;
+use groestlcoin::constants::MAX_BLOCK_WEIGHT;
 use groestlcoin::hashes::{hash160, ripemd160, sha256};
 
 use super::decode::ParseableKey;

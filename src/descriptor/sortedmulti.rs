@@ -10,7 +10,7 @@ use core::fmt;
 use core::marker::PhantomData;
 use core::str::FromStr;
 
-use groestlcoin::blockdata::script;
+use groestlcoin::script;
 
 use crate::miniscript::context::ScriptContext;
 use crate::miniscript::decode::Terminal;
@@ -140,8 +140,8 @@ impl<Pk: MiniscriptKey, Ctx: ScriptContext> SortedMultiVec<Pk, Ctx> {
         Terminal::Multi(self.k, pks)
     }
 
-    /// Encode as a Groestlcoin script
-    pub fn encode(&self) -> script::Script
+    /// Encode as a Bitcoin script
+    pub fn encode(&self) -> script::ScriptBuf
     where
         Pk: ToPublicKey,
     {

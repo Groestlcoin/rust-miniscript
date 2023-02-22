@@ -11,11 +11,11 @@ use core::marker::PhantomData;
 #[cfg(feature = "std")]
 use std::error;
 
-use groestlcoin::blockdata::constants::MAX_BLOCK_WEIGHT;
+use groestlcoin::constants::MAX_BLOCK_WEIGHT;
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use groestlcoin::Sequence;
 use sync::Arc;
 
-use crate::groestlcoin::{LockTime, PackedLockTime, Sequence};
 use crate::miniscript::lex::{Token as Tk, TokenIter};
 use crate::miniscript::limits::MAX_PUBKEYS_PER_MULTISIG;
 use crate::miniscript::types::extra_props::ExtData;
@@ -24,7 +24,7 @@ use crate::miniscript::ScriptContext;
 use crate::prelude::*;
 #[cfg(doc)]
 use crate::Descriptor;
-use crate::{groestlcoin, hash256, Error, Miniscript, MiniscriptKey, ToPublicKey};
+use crate::{groestlcoin, hash256, AbsLockTime, Error, Miniscript, MiniscriptKey, ToPublicKey};
 
 fn return_none<T>(_: usize) -> Option<T> {
     None
@@ -52,8 +52,8 @@ impl ParseableKey for groestlcoin::secp256k1::XOnlyPublicKey {
 /// Decoding error while parsing keys
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum KeyParseError {
-    /// Groestlcoin PublicKey parse error
-    FullKeyParseError(groestlcoin::util::key::Error),
+    /// Bitcoin PublicKey parse error
+    FullKeyParseError(groestlcoin::key::Error),
     /// Xonly key parse Error
     XonlyKeyParseError(groestlcoin::secp256k1::Error),
 }
@@ -141,7 +141,7 @@ pub enum Terminal<Pk: MiniscriptKey, Ctx: ScriptContext> {
     RawPkH(hash160::Hash),
     // timelocks
     /// `n CHECKLOCKTIMEVERIFY`
-    After(PackedLockTime),
+    After(AbsLockTime),
     /// `n CHECKSEQUENCEVERIFY`
     Older(Sequence),
     // hashlocks
@@ -396,7 +396,7 @@ pub fn parse<Ctx: ScriptContext>(
                     Tk::CheckSequenceVerify, Tk::Num(n)
                         => term.reduce0(Terminal::Older(Sequence::from_consensus(n)))?,
                     Tk::CheckLockTimeVerify, Tk::Num(n)
-                        => term.reduce0(Terminal::After(LockTime::from_consensus(n).into()))?,
+                        => term.reduce0(Terminal::After(AbsLockTime::from_consensus(n)))?,
                     // hashlocks
                     Tk::Equal => match_token!(
                         tokens,

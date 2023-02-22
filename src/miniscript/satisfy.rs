@@ -10,9 +10,9 @@
 use core::{cmp, i64, mem};
 
 use groestlcoin::hashes::hash160;
-use groestlcoin::secp256k1::XOnlyPublicKey;
-use groestlcoin::util::taproot::{ControlBlock, LeafVersion, TapLeafHash};
-use groestlcoin::{LockTime, Sequence};
+use groestlcoin::key::XOnlyPublicKey;
+use groestlcoin::taproot::{ControlBlock, LeafVersion, TapLeafHash};
+use groestlcoin::{absolute, Sequence};
 use sync::Arc;
 
 use super::context::SigType;
@@ -28,12 +28,12 @@ pub type Preimage32 = [u8; 32];
 /// have data for.
 pub trait Satisfier<Pk: MiniscriptKey + ToPublicKey> {
     /// Given a public key, look up an ECDSA signature with that key
-    fn lookup_ecdsa_sig(&self, _: &Pk) -> Option<groestlcoin::EcdsaSig> {
+    fn lookup_ecdsa_sig(&self, _: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
         None
     }
 
     /// Lookup the tap key spend sig
-    fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::SchnorrSig> {
+    fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::taproot::Signature> {
         None
     }
 
@@ -42,14 +42,14 @@ pub trait Satisfier<Pk: MiniscriptKey + ToPublicKey> {
         &self,
         _: &Pk,
         _: &TapLeafHash,
-    ) -> Option<groestlcoin::SchnorrSig> {
+    ) -> Option<groestlcoin::taproot::Signature> {
         None
     }
 
     /// Obtain a reference to the control block for a ver and script
     fn lookup_tap_control_block_map(
         &self,
-    ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::Script, LeafVersion)>> {
+    ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::ScriptBuf, LeafVersion)>> {
         None
     }
 
@@ -58,7 +58,7 @@ pub trait Satisfier<Pk: MiniscriptKey + ToPublicKey> {
         None
     }
 
-    /// Given a raw `Pkh`, lookup corresponding [`groestlcoin::XOnlyPublicKey`]
+    /// Given a raw `Pkh`, lookup corresponding [`groestlcoin::secp256k1::XOnlyPublicKey`]
     fn lookup_raw_pkh_x_only_pk(&self, _: &hash160::Hash) -> Option<XOnlyPublicKey> {
         None
     }
@@ -70,7 +70,7 @@ pub trait Satisfier<Pk: MiniscriptKey + ToPublicKey> {
     fn lookup_raw_pkh_ecdsa_sig(
         &self,
         _: &hash160::Hash,
-    ) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
+    ) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
         None
     }
 
@@ -81,7 +81,7 @@ pub trait Satisfier<Pk: MiniscriptKey + ToPublicKey> {
     fn lookup_raw_pkh_tap_leaf_script_sig(
         &self,
         _: &(hash160::Hash, TapLeafHash),
-    ) -> Option<(XOnlyPublicKey, groestlcoin::SchnorrSig)> {
+    ) -> Option<(XOnlyPublicKey, groestlcoin::taproot::Signature)> {
         None
     }
 
@@ -111,7 +111,7 @@ pub trait Satisfier<Pk: MiniscriptKey + ToPublicKey> {
     }
 
     /// Assert whether a absolute locktime is satisfied
-    fn check_after(&self, _: LockTime) -> bool {
+    fn check_after(&self, _: absolute::LockTime) -> bool {
         false
     }
 }
@@ -143,9 +143,9 @@ impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for Sequence {
     }
 }
 
-impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for LockTime {
-    fn check_after(&self, n: LockTime) -> bool {
-        use LockTime::*;
+impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for absolute::LockTime {
+    fn check_after(&self, n: absolute::LockTime) -> bool {
+        use absolute::LockTime::*;
 
         match (n, *self) {
             (Blocks(n), Blocks(lock_time)) => n <= lock_time,
@@ -154,20 +154,20 @@ impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for LockTime {
         }
     }
 }
-impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for HashMap<Pk, groestlcoin::EcdsaSig> {
-    fn lookup_ecdsa_sig(&self, key: &Pk) -> Option<groestlcoin::EcdsaSig> {
+impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for HashMap<Pk, groestlcoin::ecdsa::Signature> {
+    fn lookup_ecdsa_sig(&self, key: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
         self.get(key).copied()
     }
 }
 
 impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk>
-    for HashMap<(Pk, TapLeafHash), groestlcoin::SchnorrSig>
+    for HashMap<(Pk, TapLeafHash), groestlcoin::taproot::Signature>
 {
     fn lookup_tap_leaf_script_sig(
         &self,
         key: &Pk,
         h: &TapLeafHash,
-    ) -> Option<groestlcoin::SchnorrSig> {
+    ) -> Option<groestlcoin::taproot::Signature> {
         // Unfortunately, there is no way to get a &(a, b) from &a and &b without allocating
         // If we change the signature the of lookup_tap_leaf_script_sig to accept a tuple. We would
         // face the same problem while satisfying PkK.
@@ -177,11 +177,11 @@ impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk>
 }
 
 impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk>
-    for HashMap<hash160::Hash, (Pk, groestlcoin::EcdsaSig)>
+    for HashMap<hash160::Hash, (Pk, groestlcoin::ecdsa::Signature)>
 where
     Pk: MiniscriptKey + ToPublicKey,
 {
-    fn lookup_ecdsa_sig(&self, key: &Pk) -> Option<groestlcoin::EcdsaSig> {
+    fn lookup_ecdsa_sig(&self, key: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
         self.get(&key.to_pubkeyhash(SigType::Ecdsa)).map(|x| x.1)
     }
 
@@ -192,14 +192,14 @@ where
     fn lookup_raw_pkh_ecdsa_sig(
         &self,
         pk_hash: &hash160::Hash,
-    ) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
+    ) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
         self.get(pk_hash)
             .map(|&(ref pk, sig)| (pk.to_public_key(), sig))
     }
 }
 
 impl<Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk>
-    for HashMap<(hash160::Hash, TapLeafHash), (Pk, groestlcoin::SchnorrSig)>
+    for HashMap<(hash160::Hash, TapLeafHash), (Pk, groestlcoin::taproot::Signature)>
 where
     Pk: MiniscriptKey + ToPublicKey,
 {
@@ -207,7 +207,7 @@ where
         &self,
         key: &Pk,
         h: &TapLeafHash,
-    ) -> Option<groestlcoin::SchnorrSig> {
+    ) -> Option<groestlcoin::taproot::Signature> {
         self.get(&(key.to_pubkeyhash(SigType::Schnorr), *h))
             .map(|x| x.1)
     }
@@ -215,14 +215,14 @@ where
     fn lookup_raw_pkh_tap_leaf_script_sig(
         &self,
         pk_hash: &(hash160::Hash, TapLeafHash),
-    ) -> Option<(XOnlyPublicKey, groestlcoin::SchnorrSig)> {
+    ) -> Option<(XOnlyPublicKey, groestlcoin::taproot::Signature)> {
         self.get(pk_hash)
             .map(|&(ref pk, sig)| (pk.to_x_only_pubkey(), sig))
     }
 }
 
 impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'a S {
-    fn lookup_ecdsa_sig(&self, p: &Pk) -> Option<groestlcoin::EcdsaSig> {
+    fn lookup_ecdsa_sig(&self, p: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
         (**self).lookup_ecdsa_sig(p)
     }
 
@@ -230,7 +230,7 @@ impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'
         &self,
         p: &Pk,
         h: &TapLeafHash,
-    ) -> Option<groestlcoin::SchnorrSig> {
+    ) -> Option<groestlcoin::taproot::Signature> {
         (**self).lookup_tap_leaf_script_sig(p, h)
     }
 
@@ -245,24 +245,24 @@ impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'
     fn lookup_raw_pkh_ecdsa_sig(
         &self,
         pkh: &hash160::Hash,
-    ) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
+    ) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
         (**self).lookup_raw_pkh_ecdsa_sig(pkh)
     }
 
-    fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::SchnorrSig> {
+    fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::taproot::Signature> {
         (**self).lookup_tap_key_spend_sig()
     }
 
     fn lookup_raw_pkh_tap_leaf_script_sig(
         &self,
         pkh: &(hash160::Hash, TapLeafHash),
-    ) -> Option<(XOnlyPublicKey, groestlcoin::SchnorrSig)> {
+    ) -> Option<(XOnlyPublicKey, groestlcoin::taproot::Signature)> {
         (**self).lookup_raw_pkh_tap_leaf_script_sig(pkh)
     }
 
     fn lookup_tap_control_block_map(
         &self,
-    ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::Script, LeafVersion)>> {
+    ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::ScriptBuf, LeafVersion)>> {
         (**self).lookup_tap_control_block_map()
     }
 
@@ -286,13 +286,13 @@ impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'
         (**self).check_older(t)
     }
 
-    fn check_after(&self, n: LockTime) -> bool {
+    fn check_after(&self, n: absolute::LockTime) -> bool {
         (**self).check_after(n)
     }
 }
 
 impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'a mut S {
-    fn lookup_ecdsa_sig(&self, p: &Pk) -> Option<groestlcoin::EcdsaSig> {
+    fn lookup_ecdsa_sig(&self, p: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
         (**self).lookup_ecdsa_sig(p)
     }
 
@@ -300,11 +300,11 @@ impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'
         &self,
         p: &Pk,
         h: &TapLeafHash,
-    ) -> Option<groestlcoin::SchnorrSig> {
+    ) -> Option<groestlcoin::taproot::Signature> {
         (**self).lookup_tap_leaf_script_sig(p, h)
     }
 
-    fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::SchnorrSig> {
+    fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::taproot::Signature> {
         (**self).lookup_tap_key_spend_sig()
     }
 
@@ -319,20 +319,20 @@ impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'
     fn lookup_raw_pkh_ecdsa_sig(
         &self,
         pkh: &hash160::Hash,
-    ) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
+    ) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
         (**self).lookup_raw_pkh_ecdsa_sig(pkh)
     }
 
     fn lookup_raw_pkh_tap_leaf_script_sig(
         &self,
         pkh: &(hash160::Hash, TapLeafHash),
-    ) -> Option<(XOnlyPublicKey, groestlcoin::SchnorrSig)> {
+    ) -> Option<(XOnlyPublicKey, groestlcoin::taproot::Signature)> {
         (**self).lookup_raw_pkh_tap_leaf_script_sig(pkh)
     }
 
     fn lookup_tap_control_block_map(
         &self,
-    ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::Script, LeafVersion)>> {
+    ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::ScriptBuf, LeafVersion)>> {
         (**self).lookup_tap_control_block_map()
     }
 
@@ -356,7 +356,7 @@ impl<'a, Pk: MiniscriptKey + ToPublicKey, S: Satisfier<Pk>> Satisfier<Pk> for &'
         (**self).check_older(t)
     }
 
-    fn check_after(&self, n: LockTime) -> bool {
+    fn check_after(&self, n: absolute::LockTime) -> bool {
         (**self).check_after(n)
     }
 }
@@ -369,7 +369,7 @@ macro_rules! impl_tuple_satisfier {
             Pk: MiniscriptKey + ToPublicKey,
             $($ty: Satisfier< Pk>,)*
         {
-            fn lookup_ecdsa_sig(&self, key: &Pk) -> Option<groestlcoin::EcdsaSig> {
+            fn lookup_ecdsa_sig(&self, key: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
                 let &($(ref $ty,)*) = self;
                 $(
                     if let Some(result) = $ty.lookup_ecdsa_sig(key) {
@@ -379,7 +379,7 @@ macro_rules! impl_tuple_satisfier {
                 None
             }
 
-            fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::SchnorrSig> {
+            fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::taproot::Signature> {
                 let &($(ref $ty,)*) = self;
                 $(
                     if let Some(result) = $ty.lookup_tap_key_spend_sig() {
@@ -389,11 +389,7 @@ macro_rules! impl_tuple_satisfier {
                 None
             }
 
-            fn lookup_tap_leaf_script_sig(
-                &self,
-                key: &Pk,
-                h: &TapLeafHash,
-            ) -> Option<groestlcoin::SchnorrSig> {
+            fn lookup_tap_leaf_script_sig(&self, key: &Pk, h: &TapLeafHash) -> Option<groestlcoin::taproot::Signature> {
                 let &($(ref $ty,)*) = self;
                 $(
                     if let Some(result) = $ty.lookup_tap_leaf_script_sig(key, h) {
@@ -406,7 +402,7 @@ macro_rules! impl_tuple_satisfier {
             fn lookup_raw_pkh_ecdsa_sig(
                 &self,
                 key_hash: &hash160::Hash,
-            ) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
+            ) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
                 let &($(ref $ty,)*) = self;
                 $(
                     if let Some(result) = $ty.lookup_raw_pkh_ecdsa_sig(key_hash) {
@@ -419,7 +415,7 @@ macro_rules! impl_tuple_satisfier {
             fn lookup_raw_pkh_tap_leaf_script_sig(
                 &self,
                 key_hash: &(hash160::Hash, TapLeafHash),
-            ) -> Option<(XOnlyPublicKey, groestlcoin::SchnorrSig)> {
+            ) -> Option<(XOnlyPublicKey, groestlcoin::taproot::Signature)> {
                 let &($(ref $ty,)*) = self;
                 $(
                     if let Some(result) = $ty.lookup_raw_pkh_tap_leaf_script_sig(key_hash) {
@@ -457,7 +453,7 @@ macro_rules! impl_tuple_satisfier {
 
             fn lookup_tap_control_block_map(
                 &self,
-            ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::Script, LeafVersion)>> {
+            ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::ScriptBuf, LeafVersion)>> {
                 let &($(ref $ty,)*) = self;
                 $(
                     if let Some(result) = $ty.lookup_tap_control_block_map() {
@@ -517,7 +513,7 @@ macro_rules! impl_tuple_satisfier {
                 false
             }
 
-            fn check_after(&self, n: LockTime) -> bool {
+            fn check_after(&self, n: absolute::LockTime) -> bool {
                 let &($(ref $ty,)*) = self;
                 $(
                     if $ty.check_after(n) {

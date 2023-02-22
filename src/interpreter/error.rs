@@ -6,9 +6,8 @@ use core::fmt;
 use std::error;
 
 use groestlcoin::hashes::hash160;
-use groestlcoin::hashes::hex::ToHex;
-use groestlcoin::util::taproot;
-use groestlcoin::{self, secp256k1};
+use groestlcoin::{secp256k1, taproot};
+use internals::hex::display::DisplayHex;
 
 use super::BitcoinKey;
 use crate::prelude::*;
@@ -31,8 +30,8 @@ pub enum Error {
     ControlBlockVerificationError,
     /// General Interpreter error.
     CouldNotEvaluate,
-    /// EcdsaSig related error
-    EcdsaSig(groestlcoin::EcdsaSigError),
+    /// ECDSA Signature related error
+    EcdsaSig(groestlcoin::ecdsa::Error),
     /// We expected a push (including a `OP_1` but no other numeric pushes)
     ExpectedPush,
     /// The preimage to the hash function must be exactly 32 bytes.
@@ -52,7 +51,7 @@ pub enum Error {
     /// ecdsa Signature failed to verify
     InvalidEcdsaSignature(groestlcoin::PublicKey),
     /// Signature failed to verify
-    InvalidSchnorrSignature(groestlcoin::XOnlyPublicKey),
+    InvalidSchnorrSignature(groestlcoin::key::XOnlyPublicKey),
     /// Last byte of this signature isn't a standard sighash type
     NonStandardSighash(Vec<u8>),
     /// Miniscript error
@@ -90,9 +89,9 @@ pub enum Error {
     /// Miniscript requires the entire top level script to be satisfied.
     ScriptSatisfactionError,
     /// Schnorr Signature error
-    SchnorrSig(groestlcoin::SchnorrSigError),
+    SchnorrSig(groestlcoin::taproot::Error),
     /// Errors in signature hash calculations
-    SighashError(groestlcoin::util::sighash::Error),
+    SighashError(groestlcoin::sighash::Error),
     /// Taproot Annex Unsupported
     TapAnnexUnsupported,
     /// An uncompressed public key was encountered in a context where it is
@@ -143,15 +142,15 @@ impl fmt::Display for Error {
             Error::InsufficientSignaturesMultiSig => f.write_str("Insufficient signatures for CMS"),
             Error::InvalidSchnorrSighashType(ref sig) => write!(
                 f,
-                "Invalid sighash type for schnorr signature '{}'",
-                sig.to_hex()
+                "Invalid sighash type for schnorr signature '{:x}'",
+                sig.as_hex()
             ),
             Error::InvalidEcdsaSignature(pk) => write!(f, "bad ecdsa signature with pk {}", pk),
             Error::InvalidSchnorrSignature(pk) => write!(f, "bad schnorr signature with pk {}", pk),
             Error::NonStandardSighash(ref sig) => write!(
                 f,
-                "Non standard sighash type for signature '{}'",
-                sig.to_hex()
+                "Non standard sighash type for signature '{:x}'",
+                sig.as_hex()
             ),
             Error::NonEmptyWitness => f.write_str("legacy spend had nonempty witness"),
             Error::NonEmptyScriptSig => f.write_str("segwit spend had nonempty scriptsig"),
@@ -243,22 +242,22 @@ impl From<secp256k1::Error> for Error {
 }
 
 #[doc(hidden)]
-impl From<groestlcoin::util::sighash::Error> for Error {
-    fn from(e: groestlcoin::util::sighash::Error) -> Error {
+impl From<groestlcoin::sighash::Error> for Error {
+    fn from(e: groestlcoin::sighash::Error) -> Error {
         Error::SighashError(e)
     }
 }
 
 #[doc(hidden)]
-impl From<groestlcoin::EcdsaSigError> for Error {
-    fn from(e: groestlcoin::EcdsaSigError) -> Error {
+impl From<groestlcoin::ecdsa::Error> for Error {
+    fn from(e: groestlcoin::ecdsa::Error) -> Error {
         Error::EcdsaSig(e)
     }
 }
 
 #[doc(hidden)]
-impl From<groestlcoin::SchnorrSigError> for Error {
-    fn from(e: groestlcoin::SchnorrSigError) -> Error {
+impl From<groestlcoin::taproot::Error> for Error {
+    fn from(e: groestlcoin::taproot::Error) -> Error {
         Error::SchnorrSig(e)
     }
 }
@@ -277,7 +276,7 @@ pub enum PkEvalErrInner {
     /// Full Key
     FullKey(groestlcoin::PublicKey),
     /// XOnly Key
-    XOnlyKey(groestlcoin::XOnlyPublicKey),
+    XOnlyKey(groestlcoin::key::XOnlyPublicKey),
 }
 
 impl From<BitcoinKey> for PkEvalErrInner {

@@ -11,10 +11,8 @@
 use core::fmt;
 use core::str::FromStr;
 
-use groestlcoin::blockdata::witness::Witness;
-use groestlcoin::hashes::{hash160, ripemd160, sha256};
-use groestlcoin::util::{sighash, taproot};
-use groestlcoin::{self, secp256k1, LockTime, Sequence, TxOut};
+use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use groestlcoin::{absolute, secp256k1, sighash, taproot, Sequence, TxOut, Witness};
 
 use crate::miniscript::context::{NoChecks, SigType};
 use crate::miniscript::ScriptContext;
@@ -36,9 +34,9 @@ pub struct Interpreter<'txin> {
     stack: Stack<'txin>,
     /// For non-Taproot spends, the scriptCode; for Taproot script-spends, this
     /// is the leaf script; for key-spends it is `None`.
-    script_code: Option<groestlcoin::Script>,
+    script_code: Option<groestlcoin::ScriptBuf>,
     age: Sequence,
-    lock_time: LockTime,
+    lock_time: absolute::LockTime,
 }
 
 // A type representing functions for checking signatures that accept both
@@ -48,22 +46,24 @@ pub struct Interpreter<'txin> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeySigPair {
     /// A Full public key and corresponding Ecdsa signature
-    Ecdsa(groestlcoin::PublicKey, groestlcoin::EcdsaSig),
+    Ecdsa(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature),
     /// A x-only key and corresponding Schnorr signature
-    Schnorr(groestlcoin::XOnlyPublicKey, groestlcoin::SchnorrSig),
+    Schnorr(groestlcoin::key::XOnlyPublicKey, groestlcoin::taproot::Signature),
 }
 
 impl KeySigPair {
-    /// Obtain a pair of ([`groestlcoin::PublicKey`], [`groestlcoin::EcdsaSig`]) from [`KeySigPair`]
-    pub fn as_ecdsa(&self) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
+    /// Obtain a pair of ([`groestlcoin::PublicKey`], [`groestlcoin::ecdsa::Signature`]) from [`KeySigPair`]
+    pub fn as_ecdsa(&self) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
         match self {
             KeySigPair::Ecdsa(pk, sig) => Some((*pk, *sig)),
             KeySigPair::Schnorr(_, _) => None,
         }
     }
 
-    /// Obtain a pair of ([`groestlcoin::XOnlyPublicKey`], [`groestlcoin::SchnorrSig`]) from [`KeySigPair`]
-    pub fn as_schnorr(&self) -> Option<(groestlcoin::XOnlyPublicKey, groestlcoin::SchnorrSig)> {
+    /// Obtain a pair of ([`groestlcoin::secp256k1::XOnlyPublicKey`], [`groestlcoin::taproot::Signature`]) from [`KeySigPair`]
+    pub fn as_schnorr(
+        &self,
+    ) -> Option<(groestlcoin::key::XOnlyPublicKey, groestlcoin::taproot::Signature)> {
         match self {
             KeySigPair::Ecdsa(_, _) => None,
             KeySigPair::Schnorr(pk, sig) => Some((*pk, *sig)),
@@ -88,7 +88,7 @@ enum BitcoinKey {
     // Full key
     Fullkey(groestlcoin::PublicKey),
     // Xonly key
-    XOnlyPublicKey(groestlcoin::XOnlyPublicKey),
+    XOnlyPublicKey(groestlcoin::key::XOnlyPublicKey),
 }
 
 impl BitcoinKey {
@@ -116,8 +116,8 @@ impl From<groestlcoin::PublicKey> for BitcoinKey {
     }
 }
 
-impl From<groestlcoin::XOnlyPublicKey> for BitcoinKey {
-    fn from(xpk: groestlcoin::XOnlyPublicKey) -> Self {
+impl From<groestlcoin::key::XOnlyPublicKey> for BitcoinKey {
+    fn from(xpk: groestlcoin::key::XOnlyPublicKey) -> Self {
         BitcoinKey::XOnlyPublicKey(xpk)
     }
 }
@@ -141,11 +141,11 @@ impl<'txin> Interpreter<'txin> {
     /// function; otherwise, it should be a closure containing a sighash and
     /// secp context, which can actually verify a given signature.
     pub fn from_txdata(
-        spk: &groestlcoin::Script,
+        spk: &groestlcoin::ScriptBuf,
         script_sig: &'txin groestlcoin::Script,
         witness: &'txin Witness,
-        age: Sequence,       // CSV, relative lock time.
-        lock_time: LockTime, // CLTV, absolute lock time.
+        age: Sequence,                 // CSV, relative lock time.
+        lock_time: absolute::LockTime, // CLTV, absolute lock time.
     ) -> Result<Self, Error> {
         let (inner, stack, script_code) = inner::from_txdata(spk, script_sig, witness)?;
         Ok(Interpreter {
@@ -222,25 +222,36 @@ impl<'txin> Interpreter<'txin> {
                 sighash::Prevouts::All(prevouts) => prevouts.get(input_index),
             }
         }
-        let mut cache = groestlcoin::util::sighash::SighashCache::new(tx);
+        let mut cache = groestlcoin::sighash::SighashCache::new(tx);
         match sig {
             KeySigPair::Ecdsa(key, ecdsa_sig) => {
                 let script_pubkey = self.script_code.as_ref().expect("Legacy have script code");
-                let sighash = if self.is_legacy() {
+                let msg = if self.is_legacy() {
                     let sighash_u32 = ecdsa_sig.hash_ty.to_u32();
-                    cache.legacy_signature_hash(input_idx, script_pubkey, sighash_u32)
+                    let sighash =
+                        cache.legacy_signature_hash(input_idx, script_pubkey, sighash_u32);
+                    sighash.map(|hash| {
+                        secp256k1::Message::from_slice(hash.as_byte_array()).expect("32 byte")
+                    })
                 } else if self.is_segwit_v0() {
                     let amt = match get_prevout(prevouts, input_idx) {
                         Some(txout) => txout.borrow().value,
                         None => return false,
                     };
-                    cache.segwit_signature_hash(input_idx, script_pubkey, amt, ecdsa_sig.hash_ty)
+                    let sighash = cache.segwit_signature_hash(
+                        input_idx,
+                        script_pubkey,
+                        amt,
+                        ecdsa_sig.hash_ty,
+                    );
+                    sighash.map(|hash| {
+                        secp256k1::Message::from_slice(hash.as_byte_array()).expect("32 byte")
+                    })
                 } else {
                     // taproot(or future) signatures in segwitv0 context
                     return false;
                 };
-                let msg =
-                    sighash.map(|hash| secp256k1::Message::from_slice(&hash).expect("32 byte"));
+
                 let success =
                     msg.map(|msg| secp.verify_ecdsa(&msg, &ecdsa_sig.sig, &key.inner).is_ok());
                 success.unwrap_or(false) // unwrap_or checks for errors, while success would have checksig results
@@ -267,8 +278,9 @@ impl<'txin> Interpreter<'txin> {
                     // schnorr sigs in ecdsa descriptors
                     return false;
                 };
-                let msg =
-                    sighash_msg.map(|hash| secp256k1::Message::from_slice(&hash).expect("32 byte"));
+                let msg = sighash_msg.map(|hash| {
+                    secp256k1::Message::from_slice(hash.as_byte_array()).expect("32 byte")
+                });
                 let success =
                     msg.map(|msg| secp.verify_schnorr(&schnorr_sig.sig, &msg, xpk).is_ok());
                 success.unwrap_or(false) // unwrap_or_default checks for errors, while success would have checksig results
@@ -484,7 +496,7 @@ pub enum SatisfiedConstraint {
     ///Absolute Timelock for CLTV.
     AbsoluteTimelock {
         /// The value of Absolute timelock
-        n: LockTime,
+        n: absolute::LockTime,
     },
 }
 
@@ -520,7 +532,7 @@ pub struct Iter<'intp, 'txin: 'intp> {
     state: Vec<NodeEvaluationState<'intp>>,
     stack: Stack<'txin>,
     age: Sequence,
-    lock_time: LockTime,
+    lock_time: absolute::LockTime,
     has_errored: bool,
     sig_type: SigType,
 }
@@ -612,7 +624,9 @@ where
                 Terminal::After(ref n) => {
                     debug_assert_eq!(node_state.n_evaluated, 0);
                     debug_assert_eq!(node_state.n_satisfied, 0);
-                    let res = self.stack.evaluate_after(&n.into(), self.lock_time);
+                    let res = self
+                        .stack
+                        .evaluate_after(&absolute::LockTime::from(*n), self.lock_time);
                     if res.is_some() {
                         return res;
                     }
@@ -1012,7 +1026,7 @@ fn verify_sersig<'txin>(
 ) -> Result<KeySigPair, Error> {
     match pk {
         BitcoinKey::Fullkey(pk) => {
-            let ecdsa_sig = groestlcoin::EcdsaSig::from_slice(sigser)?;
+            let ecdsa_sig = groestlcoin::ecdsa::Signature::from_slice(sigser)?;
             let key_sig_pair = KeySigPair::Ecdsa(*pk, ecdsa_sig);
             if verify_sig(&key_sig_pair) {
                 Ok(key_sig_pair)
@@ -1020,8 +1034,8 @@ fn verify_sersig<'txin>(
                 Err(Error::InvalidEcdsaSignature(*pk))
             }
         }
-        BitcoinKey::XOnlyPublicKey(x_only_pk) => {
-            let schnorr_sig = groestlcoin::SchnorrSig::from_slice(sigser)?;
+        groestlcoinKey::XOnlyPublicKey(x_only_pk) => {
+            let schnorr_sig = groestlcoin::taproot::Signature::from_slice(sigser)?;
             let key_sig_pair = KeySigPair::Schnorr(*x_only_pk, schnorr_sig);
             if verify_sig(&key_sig_pair) {
                 Ok(key_sig_pair)
@@ -1050,11 +1064,11 @@ mod tests {
     ) -> (
         Vec<groestlcoin::PublicKey>,
         Vec<Vec<u8>>,
-        Vec<groestlcoin::EcdsaSig>,
+        Vec<groestlcoin::ecdsa::Signature>,
         secp256k1::Message,
         Secp256k1<secp256k1::All>,
-        Vec<groestlcoin::XOnlyPublicKey>,
-        Vec<groestlcoin::SchnorrSig>,
+        Vec<groestlcoin::key::XOnlyPublicKey>,
+        Vec<groestlcoin::taproot::Signature>,
         Vec<Vec<u8>>,
     ) {
         let secp = secp256k1::Secp256k1::new();
@@ -1079,22 +1093,22 @@ mod tests {
                 compressed: true,
             };
             let sig = secp.sign_ecdsa(&msg, &sk);
-            ecdsa_sigs.push(groestlcoin::EcdsaSig {
+            ecdsa_sigs.push(groestlcoin::ecdsa::Signature {
                 sig,
-                hash_ty: groestlcoin::EcdsaSighashType::All,
+                hash_ty: groestlcoin::sighash::EcdsaSighashType::All,
             });
             let mut sigser = sig.serialize_der().to_vec();
             sigser.push(0x01); // sighash_all
             pks.push(pk);
             der_sigs.push(sigser);
 
-            let keypair = groestlcoin::KeyPair::from_secret_key(&secp, &sk);
-            let (x_only_pk, _parity) = groestlcoin::XOnlyPublicKey::from_keypair(&keypair);
+            let keypair = groestlcoin::key::KeyPair::from_secret_key(&secp, &sk);
+            let (x_only_pk, _parity) = groestlcoin::key::XOnlyPublicKey::from_keypair(&keypair);
             x_only_pks.push(x_only_pk);
             let schnorr_sig = secp.sign_schnorr_with_aux_rand(&msg, &keypair, &[0u8; 32]);
-            let schnorr_sig = groestlcoin::SchnorrSig {
+            let schnorr_sig = groestlcoin::taproot::Signature {
                 sig: schnorr_sig,
-                hash_ty: groestlcoin::SchnorrSighashType::Default,
+                hash_ty: groestlcoin::sighash::TapSighashType::Default,
             };
             ser_schnorr_sigs.push(schnorr_sig.to_vec());
             schnorr_sigs.push(schnorr_sig);
@@ -1140,7 +1154,7 @@ mod tests {
                     n_satisfied: 0,
                 }],
                 age: Sequence::from_height(1002),
-                lock_time: LockTime::from_height(1002).unwrap(),
+                lock_time: absolute::LockTime::from_height(1002).unwrap(),
                 has_errored: false,
                 sig_type: SigType::Ecdsa,
             }
@@ -1201,7 +1215,7 @@ mod tests {
         assert_eq!(
             after_satisfied.unwrap(),
             vec![SatisfiedConstraint::AbsoluteTimelock {
-                n: LockTime::from_height(1000).unwrap()
+                n: absolute::LockTime::from_height(1000).unwrap()
             }]
         );
 
@@ -1585,7 +1599,7 @@ mod tests {
     }
 
     fn x_only_no_checks_ms(ms: &str) -> Miniscript<BitcoinKey, NoChecks> {
-        let elem: Miniscript<groestlcoin::XOnlyPublicKey, NoChecks> =
+        let elem: Miniscript<groestlcoin::key::XOnlyPublicKey, NoChecks> =
             Miniscript::from_str_ext(ms, &ExtParams::allow_all()).unwrap();
         elem.to_no_checks_ms()
     }

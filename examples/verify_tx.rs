@@ -18,8 +18,7 @@ use std::str::FromStr;
 
 use groestlcoin::consensus::Decodable;
 use groestlcoin::secp256k1::{self, Secp256k1};
-use groestlcoin::util::sighash;
-use groestlcoin::{LockTime, Sequence};
+use groestlcoin::{absolute, sighash, Sequence};
 use miniscript::interpreter::KeySigPair;
 
 fn main() {
@@ -35,7 +34,7 @@ fn main() {
         &tx.input[0].script_sig,
         &tx.input[0].witness,
         Sequence::ZERO,
-        LockTime::ZERO,
+        absolute::LockTime::ZERO,
     )
     .unwrap();
 
@@ -102,7 +101,7 @@ fn main() {
 
     let iter = interpreter.iter_custom(Box::new(|key_sig: &KeySigPair| {
         let (pk, ecdsa_sig) = key_sig.as_ecdsa().expect("Ecdsa Sig");
-        ecdsa_sig.hash_ty == groestlcoin::EcdsaSighashType::All
+        ecdsa_sig.hash_ty == groestlcoin::sighash::EcdsaSighashType::All
             && secp
                 .verify_ecdsa(&message, &ecdsa_sig.sig, &pk.inner)
                 .is_ok()
@@ -176,8 +175,8 @@ fn hard_coded_transaction() -> groestlcoin::Transaction {
     groestlcoin::Transaction::consensus_decode(&mut &tx_bytes[..]).expect("decode transaction")
 }
 
-fn hard_coded_script_pubkey() -> groestlcoin::Script {
-    groestlcoin::Script::from(vec![
+fn hard_coded_script_pubkey() -> groestlcoin::ScriptBuf {
+    groestlcoin::ScriptBuf::from(vec![
         0xa9, 0x14, 0x92, 0x09, 0xa8, 0xf9, 0x0c, 0x58, 0x4b, 0xb5, 0x97, 0x4d, 0x58, 0x68, 0x72,
         0x49, 0xe5, 0x32, 0xde, 0x59, 0xf4, 0xbc, 0x87,
     ])

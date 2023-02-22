@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 use groestlcoin::blockdata::witness::Witness;
-use groestlcoin::{secp256k1, PackedLockTime, Sequence};
+use groestlcoin::{absolute, ecdsa, secp256k1, Sequence};
 
 fn main() {
     let mut tx = spending_transaction();
@@ -63,7 +63,7 @@ fn main() {
     // Attempt to satisfy at age 0, height 0.
     let original_txin = tx.input[0].clone();
 
-    let mut sigs = HashMap::<groestlcoin::PublicKey, miniscript::groestlcoin::EcdsaSig>::new();
+    let mut sigs = HashMap::<groestlcoin::PublicKey, ecdsa::Signature>::new();
 
     // Doesn't work with no signatures.
     assert!(descriptor.satisfy(&mut tx.input[0], &sigs).is_err());
@@ -91,15 +91,15 @@ fn main() {
 fn spending_transaction() -> groestlcoin::Transaction {
     groestlcoin::Transaction {
         version: 2,
-        lock_time: PackedLockTime::ZERO,
+        lock_time: absolute::LockTime::ZERO,
         input: vec![groestlcoin::TxIn {
             previous_output: Default::default(),
-            script_sig: groestlcoin::Script::new(),
+            script_sig: groestlcoin::ScriptBuf::new(),
             sequence: Sequence::MAX,
             witness: Witness::default(),
         }],
         output: vec![groestlcoin::TxOut {
-            script_pubkey: groestlcoin::Script::new(),
+            script_pubkey: groestlcoin::ScriptBuf::new(),
             value: 100_000_000,
         }],
     }
@@ -128,8 +128,8 @@ fn list_of_three_arbitrary_public_keys() -> Vec<groestlcoin::PublicKey> {
 
 // Returns a signature copied at random off the blockchain; this is not actually
 // a valid signature for this transaction; Miniscript does not verify the validity.
-fn random_signature_from_the_blockchain() -> groestlcoin::EcdsaSig {
-    groestlcoin::EcdsaSig {
+fn random_signature_from_the_blockchain() -> ecdsa::Signature {
+    ecdsa::Signature {
         sig: secp256k1::ecdsa::Signature::from_str(
             "3045\
              0221\
@@ -138,6 +138,6 @@ fn random_signature_from_the_blockchain() -> groestlcoin::EcdsaSig {
              531d75c136272f127a5dc14acc0722301cbddc222262934151f140da345af177",
         )
         .unwrap(),
-        hash_ty: groestlcoin::EcdsaSighashType::All,
+        hash_ty: groestlcoin::sighash::EcdsaSighashType::All,
     }
 }

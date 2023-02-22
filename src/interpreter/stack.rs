@@ -3,10 +3,9 @@
 
 //! Interpreter stack
 
-use groestlcoin;
 use groestlcoin::blockdata::{opcodes, script};
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
-use groestlcoin::{LockTime, Sequence};
+use groestlcoin::{absolute, Sequence};
 
 use super::error::PkEvalErrInner;
 use super::{verify_sersig, BitcoinKey, Error, HashLockType, KeySigPair, SatisfiedConstraint};
@@ -57,7 +56,7 @@ impl<'txin> Element<'txin> {
     ) -> Result<Self, Error> {
         match ins {
             //Also covers the dissatisfied case as PushBytes0
-            Ok(script::Instruction::PushBytes(v)) => Ok(Element::from(v)),
+            Ok(script::Instruction::PushBytes(v)) => Ok(Element::from(v.as_bytes())),
             Ok(script::Instruction::Op(opcodes::all::OP_PUSHNUM_1)) => Ok(Element::Satisfied),
             _ => Err(Error::ExpectedPush),
         }
@@ -169,7 +168,7 @@ impl<'txin> Stack<'txin> {
         // We don't really store information about which key error.
         fn bitcoin_key_from_slice(sl: &[u8], sig_type: SigType) -> Option<BitcoinKey> {
             let key: BitcoinKey = match sig_type {
-                SigType::Schnorr => groestlcoin::XOnlyPublicKey::from_slice(sl).ok()?.into(),
+                SigType::Schnorr => groestlcoin::key::XOnlyPublicKey::from_slice(sl).ok()?.into(),
                 SigType::Ecdsa => groestlcoin::PublicKey::from_slice(sl).ok()?.into(),
             };
             Some(key)
@@ -221,10 +220,10 @@ impl<'txin> Stack<'txin> {
     /// booleans
     pub(super) fn evaluate_after(
         &mut self,
-        n: &LockTime,
-        lock_time: LockTime,
+        n: &absolute::LockTime,
+        lock_time: absolute::LockTime,
     ) -> Option<Result<SatisfiedConstraint, Error>> {
-        use LockTime::*;
+        use absolute::LockTime::*;
 
         let is_satisfied = match (*n, lock_time) {
             (Blocks(n), Blocks(lock_time)) => n <= lock_time,

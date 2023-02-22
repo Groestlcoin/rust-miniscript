@@ -1391,16 +1391,16 @@ mod tests {
         assert_eq!(abs.n_keys(), 5);
         assert_eq!(abs.minimum_n_keys(), Some(3));
 
-        let bitcoinsig = groestlcoin::EcdsaSig {
+        let bitcoinsig = groestlcoin::ecdsa::Signature {
             sig,
-            hash_ty: groestlcoin::EcdsaSighashType::All,
+            hash_ty: groestlcoin::sighash::EcdsaSighashType::All,
         };
         let sigvec = bitcoinsig.to_vec();
 
-        let no_sat = HashMap::<groestlcoin::PublicKey, groestlcoin::EcdsaSig>::new();
-        let mut left_sat = HashMap::<groestlcoin::PublicKey, groestlcoin::EcdsaSig>::new();
+        let no_sat = HashMap::<groestlcoin::PublicKey, groestlcoin::ecdsa::Signature>::new();
+        let mut left_sat = HashMap::<groestlcoin::PublicKey, groestlcoin::ecdsa::Signature>::new();
         let mut right_sat =
-            HashMap::<hashes::hash160::Hash, (groestlcoin::PublicKey, groestlcoin::EcdsaSig)>::new(
+            HashMap::<hashes::hash160::Hash, (groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)>::new(
             );
 
         for i in 0..5 {
