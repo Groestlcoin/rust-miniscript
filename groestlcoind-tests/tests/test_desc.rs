@@ -7,7 +7,6 @@
 use std::collections::BTreeMap;
 use std::{error, fmt};
 
-use miniscript::groestlcoin;
 use actual_rand as rand;
 use groestlcoin::blockdata::witness::Witness;
 use groestlcoin::hashes::{sha256d, Hash};
@@ -16,12 +15,12 @@ use groestlcoin::util::sighash::SighashCache;
 use groestlcoin::util::taproot::{LeafVersion, TapLeafHash};
 use groestlcoin::util::{psbt, sighash};
 use groestlcoin::{
-    secp256k1, Amount, LockTime, OutPoint, SchnorrSig, Script, Sequence, Transaction, TxIn,
-    TxOut, Txid,
+    secp256k1, Amount, LockTime, OutPoint, SchnorrSig, Script, Sequence, Transaction, TxIn, TxOut,
+    Txid,
 };
 use bitcoind::bitcoincore_rpc::{json, Client, RpcApi};
 use miniscript::psbt::{PsbtExt, PsbtInputExt};
-use miniscript::{Descriptor, Miniscript, ScriptContext, ToPublicKey};
+use miniscript::{bitcoin, Descriptor, Miniscript, ScriptContext, ToPublicKey};
 mod setup;
 
 use rand::RngCore;

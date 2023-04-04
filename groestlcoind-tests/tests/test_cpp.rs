@@ -15,9 +15,8 @@ use groestlcoin::util::psbt;
 use groestlcoin::util::psbt::PartiallySignedTransaction as Psbt;
 use groestlcoin::{Amount, LockTime, OutPoint, Sequence, Transaction, TxIn, TxOut, Txid};
 use bitcoind::bitcoincore_rpc::{json, Client, RpcApi};
-use miniscript::groestlcoin;
 use miniscript::psbt::PsbtExt;
-use miniscript::Descriptor;
+use miniscript::{groestlcoin, Descriptor};
 
 mod setup;
 use setup::test_util::{self, PubData, TestData};

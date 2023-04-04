@@ -19,15 +19,14 @@
 
 use std::str::FromStr;
 
-use miniscript::groestlcoin;
 use actual_rand as rand;
 use groestlcoin::hashes::hex::ToHex;
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 use groestlcoin::secp256k1;
 use miniscript::descriptor::{SinglePub, SinglePubKey};
 use miniscript::{
-    hash256, Descriptor, DescriptorPublicKey, Error, Miniscript, ScriptContext, TranslatePk,
-    Translator,
+    groestlcoin, hash256, Descriptor, DescriptorPublicKey, Error, Miniscript, ScriptContext,
+    TranslatePk, Translator,
 };
 use rand::RngCore;
 
