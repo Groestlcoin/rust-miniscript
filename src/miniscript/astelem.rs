@@ -5,15 +5,15 @@
 //!
 //! Datatype describing a Miniscript "script fragment", which are the
 //! building blocks of all Miniscripts. Each fragment has a unique
-//! encoding in Bitcoin script, as well as a datatype. Full details
+//! encoding in Groestlcoin script, as well as a datatype. Full details
 //! are given on the Miniscript website.
 
 use core::fmt;
 use core::str::FromStr;
 
-use bitcoin::blockdata::{opcodes, script};
-use bitcoin::hashes::hash160;
-use bitcoin::{LockTime, Sequence};
+use groestlcoin::blockdata::{opcodes, script};
+use groestlcoin::hashes::hash160;
+use groestlcoin::{LockTime, Sequence};
 use sync::Arc;
 
 use crate::miniscript::context::SigType;
@@ -594,7 +594,7 @@ impl<Pk: MiniscriptKey, Ctx: ScriptContext> PushAstElem<Pk, Ctx> for script::Bui
 }
 
 impl<Pk: MiniscriptKey, Ctx: ScriptContext> Terminal<Pk, Ctx> {
-    /// Encode the element as a fragment of Bitcoin Script. The inverse
+    /// Encode the element as a fragment of Groestlcoin Script. The inverse
     /// function, from Script to an AST element, is implemented in the
     /// `parse` module.
     pub fn encode(&self, mut builder: script::Builder) -> script::Builder

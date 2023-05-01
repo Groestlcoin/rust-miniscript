@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 
-//! Miscellaneous constraints imposed by Bitcoin.
+//! Miscellaneous constraints imposed by Groestlcoin.
 //! These constraints can be either Consensus or Policy (standardness) rules, for either Segwitv0
 //! or Legacy scripts.
 

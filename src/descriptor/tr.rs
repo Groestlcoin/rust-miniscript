@@ -4,12 +4,12 @@ use core::cmp::{self, max};
 use core::str::FromStr;
 use core::{fmt, hash};
 
-use bitcoin::blockdata::opcodes;
-use bitcoin::util::taproot::{
+use groestlcoin::blockdata::opcodes;
+use groestlcoin::util::taproot::{
     LeafVersion, TaprootBuilder, TaprootSpendInfo, TAPROOT_CONTROL_BASE_SIZE,
     TAPROOT_CONTROL_MAX_NODE_COUNT, TAPROOT_CONTROL_NODE_SIZE,
 };
-use bitcoin::{secp256k1, Address, Network, Script};
+use groestlcoin::{secp256k1, Address, Network, Script};
 use sync::Arc;
 
 use super::checksum::{self, verify_checksum};
@@ -346,7 +346,7 @@ impl<Pk: MiniscriptKey + ToPublicKey> Tr<Pk> {
     /// Obtains the corresponding script pubkey for this descriptor.
     pub fn script_pubkey(&self) -> Script {
         let output_key = self.spend_info().output_key();
-        let builder = bitcoin::blockdata::script::Builder::new();
+        let builder = groestlcoin::blockdata::script::Builder::new();
         builder
             .push_opcode(opcodes::all::OP_PUSHNUM_1)
             .push_slice(&output_key.serialize())

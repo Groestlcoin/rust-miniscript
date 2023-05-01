@@ -2,13 +2,13 @@ extern crate miniscript;
 
 use bitcoind::bitcoincore_rpc::RpcApi;
 use bitcoind::BitcoinD;
-use miniscript::bitcoin;
+use miniscript::groestlcoin;
 
 pub mod test_util;
 
-// Launch an instance of bitcoind with
+// Launch an instance of groestlcoind with
 pub fn setup() -> BitcoinD {
-    // Create env var BITCOIND_EXE_PATH to point to the ../bitcoind/bin/bitcoind binary
+    // Create env var BITCOIND_EXE_PATH to point to the ../groestlcoind/bin/groestlcoind binary
     let key = "BITCOIND_EXE";
     let curr_dir_path = std::env::current_dir().unwrap();
     let bitcoind_path = curr_dir_path.join("bin").join("bitcoind");
@@ -24,7 +24,7 @@ pub fn setup() -> BitcoinD {
 
     assert_eq!(
         cl.get_balance(Some(1) /*min conf*/, None).unwrap(),
-        bitcoin::Amount::from_sat(100_000_000 * 50)
+        groestlcoin::Amount::from_sat(100_000_000 * 50)
     );
     bitcoind
 }

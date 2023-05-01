@@ -10,8 +10,8 @@
 
 use core::fmt;
 
-use bitcoin::blockdata::script;
-use bitcoin::{Address, Network, Script};
+use groestlcoin::blockdata::script;
+use groestlcoin::{Address, Network, Script};
 
 use super::checksum::{self, verify_checksum};
 use crate::expression::{self, FromTree};
@@ -260,7 +260,7 @@ impl<Pk: MiniscriptKey + ToPublicKey> Pkh<Pk> {
     pub fn script_pubkey(&self) -> Script {
         // Fine to hard code the `Network` here because we immediately call
         // `script_pubkey` which does not use the `network` field of `Address`.
-        let addr = self.address(Network::Bitcoin);
+        let addr = self.address(Network::Groestlcoin);
         addr.script_pubkey()
     }
 

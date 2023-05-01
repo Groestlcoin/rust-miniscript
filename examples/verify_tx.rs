@@ -16,10 +16,10 @@
 
 use std::str::FromStr;
 
-use bitcoin::consensus::Decodable;
-use bitcoin::secp256k1::{self, Secp256k1};
-use bitcoin::util::sighash;
-use bitcoin::{LockTime, Sequence};
+use groestlcoin::consensus::Decodable;
+use groestlcoin::secp256k1::{self, Secp256k1};
+use groestlcoin::util::sighash;
+use groestlcoin::{LockTime, Sequence};
 use miniscript::interpreter::KeySigPair;
 
 fn main() {
@@ -44,7 +44,7 @@ fn main() {
 
     // To do sanity checks on the transaction using the interpreter parse the
     // descriptor with `from_str`.
-    let _ = miniscript::Descriptor::<bitcoin::PublicKey>::from_str(&desc_string)
+    let _ = miniscript::Descriptor::<groestlcoin::PublicKey>::from_str(&desc_string)
         .expect("sanity checks to pass");
     // Alternately, use `inferred_descriptor` which does sanity checks for us also.
     let _ = interpreter.inferred_descriptor().expect("same as from_str");
@@ -81,7 +81,7 @@ fn main() {
 
     // We can set prevouts to be empty list because this is a legacy transaction
     // and this information is not required for sighash computation.
-    let prevouts = sighash::Prevouts::All::<bitcoin::TxOut>(&[]);
+    let prevouts = sighash::Prevouts::All::<groestlcoin::TxOut>(&[]);
 
     for elem in interpreter.iter(&secp, &tx, 0, &prevouts) {
         match elem.expect("no evaluation error") {
@@ -102,7 +102,7 @@ fn main() {
 
     let iter = interpreter.iter_custom(Box::new(|key_sig: &KeySigPair| {
         let (pk, ecdsa_sig) = key_sig.as_ecdsa().expect("Ecdsa Sig");
-        ecdsa_sig.hash_ty == bitcoin::EcdsaSighashType::All
+        ecdsa_sig.hash_ty == groestlcoin::EcdsaSighashType::All
             && secp
                 .verify_ecdsa(&message, &ecdsa_sig.sig, &pk.inner)
                 .is_ok()
@@ -117,7 +117,7 @@ fn main() {
 }
 
 /// Returns an arbitrary transaction.
-fn hard_coded_transaction() -> bitcoin::Transaction {
+fn hard_coded_transaction() -> groestlcoin::Transaction {
     // tx `f27eba163c38ad3f34971198687a3f1882b7ec818599ffe469a8440d82261c98`
     #[cfg_attr(feature="cargo-fmt", rustfmt_skip)]
     let tx_bytes = vec![
@@ -173,11 +173,11 @@ fn hard_coded_transaction() -> bitcoin::Transaction {
         0xe7, 0x87, 0x09, 0x5d, 0x07, 0x00,
     ];
 
-    bitcoin::Transaction::consensus_decode(&mut &tx_bytes[..]).expect("decode transaction")
+    groestlcoin::Transaction::consensus_decode(&mut &tx_bytes[..]).expect("decode transaction")
 }
 
-fn hard_coded_script_pubkey() -> bitcoin::Script {
-    bitcoin::Script::from(vec![
+fn hard_coded_script_pubkey() -> groestlcoin::Script {
+    groestlcoin::Script::from(vec![
         0xa9, 0x14, 0x92, 0x09, 0xa8, 0xf9, 0x0c, 0x58, 0x4b, 0xb5, 0x97, 0x4d, 0x58, 0x68, 0x72,
         0x49, 0xe5, 0x32, 0xde, 0x59, 0xf4, 0xbc, 0x87,
     ])

@@ -19,11 +19,11 @@
 
 use std::str::FromStr;
 
-use miniscript::bitcoin;
+use miniscript::groestlcoin;
 use actual_rand as rand;
-use bitcoin::hashes::hex::ToHex;
-use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
-use bitcoin::secp256k1;
+use groestlcoin::hashes::hex::ToHex;
+use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use groestlcoin::secp256k1;
 use miniscript::descriptor::{SinglePub, SinglePubKey};
 use miniscript::{
     hash256, Descriptor, DescriptorPublicKey, Error, Miniscript, ScriptContext, TranslatePk,
@@ -33,8 +33,8 @@ use rand::RngCore;
 
 #[derive(Clone, Debug)]
 pub struct PubData {
-    pub pks: Vec<bitcoin::PublicKey>,
-    pub x_only_pks: Vec<bitcoin::XOnlyPublicKey>,
+    pub pks: Vec<groestlcoin::PublicKey>,
+    pub x_only_pks: Vec<groestlcoin::XOnlyPublicKey>,
     pub sha256: sha256::Hash,
     pub hash256: hash256::Hash,
     pub ripemd160: ripemd160::Hash,
@@ -43,8 +43,8 @@ pub struct PubData {
 
 #[derive(Debug, Clone)]
 pub struct SecretData {
-    pub sks: Vec<bitcoin::secp256k1::SecretKey>,
-    pub x_only_keypairs: Vec<bitcoin::KeyPair>,
+    pub sks: Vec<groestlcoin::secp256k1::SecretKey>,
+    pub x_only_keypairs: Vec<groestlcoin::KeyPair>,
     pub sha256_pre: [u8; 32],
     pub hash256_pre: [u8; 32],
     pub ripemd160_pre: [u8; 32],
@@ -60,10 +60,10 @@ pub struct TestData {
 fn setup_keys(
     n: usize,
 ) -> (
-    Vec<bitcoin::secp256k1::SecretKey>,
-    Vec<miniscript::bitcoin::PublicKey>,
-    Vec<bitcoin::KeyPair>,
-    Vec<bitcoin::XOnlyPublicKey>,
+    Vec<groestlcoin::secp256k1::SecretKey>,
+    Vec<miniscript::groestlcoin::PublicKey>,
+    Vec<groestlcoin::KeyPair>,
+    Vec<groestlcoin::XOnlyPublicKey>,
 ) {
     let secp_sign = secp256k1::Secp256k1::signing_only();
     let mut sk = [0; 32];
@@ -75,7 +75,7 @@ fn setup_keys(
         sk[2] = (i >> 16) as u8;
 
         let sk = secp256k1::SecretKey::from_slice(&sk[..]).expect("secret key");
-        let pk = miniscript::bitcoin::PublicKey {
+        let pk = miniscript::groestlcoin::PublicKey {
             inner: secp256k1::PublicKey::from_secret_key(&secp_sign, &sk),
             compressed: true,
         };
@@ -87,8 +87,8 @@ fn setup_keys(
     let mut x_only_pks = vec![];
 
     for i in 0..n {
-        let keypair = bitcoin::KeyPair::from_secret_key(&secp_sign, &sks[i]);
-        let (xpk, _parity) = bitcoin::XOnlyPublicKey::from_keypair(&keypair);
+        let keypair = groestlcoin::KeyPair::from_secret_key(&secp_sign, &sks[i]);
+        let (xpk, _parity) = groestlcoin::XOnlyPublicKey::from_keypair(&keypair);
         x_only_keypairs.push(keypair);
         x_only_pks.push(xpk);
     }
@@ -132,7 +132,7 @@ impl TestData {
 }
 
 /// Obtain an insecure random public key with unknown secret key for testing
-pub fn random_pk(mut seed: u8) -> bitcoin::PublicKey {
+pub fn random_pk(mut seed: u8) -> groestlcoin::PublicKey {
     loop {
         let mut data = [0; 33];
         for byte in &mut data[..] {
@@ -141,7 +141,7 @@ pub fn random_pk(mut seed: u8) -> bitcoin::PublicKey {
             seed = seed.wrapping_mul(41).wrapping_add(53);
         }
         data[0] = 2 + (data[0] >> 7);
-        if let Ok(key) = bitcoin::PublicKey::from_slice(&data[..33]) {
+        if let Ok(key) = groestlcoin::PublicKey::from_slice(&data[..33]) {
             return key;
         }
     }

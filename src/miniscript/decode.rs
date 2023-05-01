@@ -3,7 +3,7 @@
 
 //! Script Decoder
 //!
-//! Functionality to parse a Bitcoin Script into a `Miniscript`
+//! Functionality to parse a Groestlcoin Script into a `Miniscript`
 //!
 
 use core::fmt;
@@ -11,11 +11,11 @@ use core::marker::PhantomData;
 #[cfg(feature = "std")]
 use std::error;
 
-use bitcoin::blockdata::constants::MAX_BLOCK_WEIGHT;
-use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use groestlcoin::blockdata::constants::MAX_BLOCK_WEIGHT;
+use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 use sync::Arc;
 
-use crate::bitcoin::{LockTime, PackedLockTime, Sequence};
+use crate::groestlcoin::{LockTime, PackedLockTime, Sequence};
 use crate::miniscript::lex::{Token as Tk, TokenIter};
 use crate::miniscript::limits::MAX_PUBKEYS_PER_MULTISIG;
 use crate::miniscript::types::extra_props::ExtData;
@@ -24,7 +24,7 @@ use crate::miniscript::ScriptContext;
 use crate::prelude::*;
 #[cfg(doc)]
 use crate::Descriptor;
-use crate::{bitcoin, hash256, Error, Miniscript, MiniscriptKey, ToPublicKey};
+use crate::{groestlcoin, hash256, Error, Miniscript, MiniscriptKey, ToPublicKey};
 
 fn return_none<T>(_: usize) -> Option<T> {
     None
@@ -36,15 +36,15 @@ pub trait ParseableKey: Sized + ToPublicKey + private::Sealed {
     fn from_slice(sl: &[u8]) -> Result<Self, KeyParseError>;
 }
 
-impl ParseableKey for bitcoin::PublicKey {
+impl ParseableKey for groestlcoin::PublicKey {
     fn from_slice(sl: &[u8]) -> Result<Self, KeyParseError> {
-        bitcoin::PublicKey::from_slice(sl).map_err(KeyParseError::FullKeyParseError)
+        groestlcoin::PublicKey::from_slice(sl).map_err(KeyParseError::FullKeyParseError)
     }
 }
 
-impl ParseableKey for bitcoin::secp256k1::XOnlyPublicKey {
+impl ParseableKey for groestlcoin::secp256k1::XOnlyPublicKey {
     fn from_slice(sl: &[u8]) -> Result<Self, KeyParseError> {
-        bitcoin::secp256k1::XOnlyPublicKey::from_slice(sl)
+        groestlcoin::secp256k1::XOnlyPublicKey::from_slice(sl)
             .map_err(KeyParseError::XonlyKeyParseError)
     }
 }
@@ -52,10 +52,10 @@ impl ParseableKey for bitcoin::secp256k1::XOnlyPublicKey {
 /// Decoding error while parsing keys
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum KeyParseError {
-    /// Bitcoin PublicKey parse error
-    FullKeyParseError(bitcoin::util::key::Error),
+    /// Groestlcoin PublicKey parse error
+    FullKeyParseError(groestlcoin::util::key::Error),
     /// Xonly key parse Error
-    XonlyKeyParseError(bitcoin::secp256k1::Error),
+    XonlyKeyParseError(groestlcoin::secp256k1::Error),
 }
 
 impl fmt::Display for KeyParseError {
@@ -83,8 +83,8 @@ mod private {
     pub trait Sealed {}
 
     // Implement for those same types, but no others.
-    impl Sealed for super::bitcoin::PublicKey {}
-    impl Sealed for super::bitcoin::secp256k1::XOnlyPublicKey {}
+    impl Sealed for super::groestlcoin::PublicKey {}
+    impl Sealed for super::groestlcoin::secp256k1::XOnlyPublicKey {}
 }
 
 #[derive(Copy, Clone, Debug)]

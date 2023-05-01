@@ -1,6 +1,6 @@
 extern crate miniscript;
 
-use miniscript::bitcoin::blockdata::script;
+use miniscript::groestlcoin::blockdata::script;
 use miniscript::Miniscript;
 use miniscript::Segwitv0;
 
@@ -8,7 +8,7 @@ fn do_test(data: &[u8]) {
     // Try round-tripping as a script
     let script = script::Script::from(data.to_owned());
 
-    if let Ok(pt) = Miniscript::<miniscript::bitcoin::PublicKey, Segwitv0>::parse(&script) {
+    if let Ok(pt) = Miniscript::<miniscript::groestlcoin::PublicKey, Segwitv0>::parse(&script) {
         let output = pt.encode();
         assert_eq!(pt.script_size(), output.len());
         assert_eq!(output, script);

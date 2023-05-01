@@ -9,13 +9,13 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-use bitcoin::hashes::{sha256d, Hash};
-use bitcoin::secp256k1::{self, Secp256k1};
-use bitcoin::util::psbt;
-use bitcoin::util::psbt::PartiallySignedTransaction as Psbt;
-use bitcoin::{Amount, LockTime, OutPoint, Sequence, Transaction, TxIn, TxOut, Txid};
+use groestlcoin::hashes::{sha256d, Hash};
+use groestlcoin::secp256k1::{self, Secp256k1};
+use groestlcoin::util::psbt;
+use groestlcoin::util::psbt::PartiallySignedTransaction as Psbt;
+use groestlcoin::{Amount, LockTime, OutPoint, Sequence, Transaction, TxIn, TxOut, Txid};
 use bitcoind::bitcoincore_rpc::{json, Client, RpcApi};
-use miniscript::bitcoin;
+use miniscript::groestlcoin;
 use miniscript::psbt::PsbtExt;
 use miniscript::Descriptor;
 
@@ -26,7 +26,7 @@ use setup::test_util::{self, PubData, TestData};
 pub(crate) fn parse_miniscripts(
     secp: &Secp256k1<secp256k1::All>,
     pubdata: &PubData,
-) -> Vec<Descriptor<bitcoin::PublicKey>> {
+) -> Vec<Descriptor<groestlcoin::PublicKey>> {
     // File must exist in current path before this produces output
     let mut desc_vec = vec![];
     // Consumes the iterator, returns an (Optional) String
@@ -86,7 +86,7 @@ pub fn test_from_cpp_ms(cl: &Client, testdata: &TestData) {
     for wsh in desc_vec.iter() {
         let txid = cl
             .send_to_address(
-                &wsh.address(bitcoin::Network::Regtest).unwrap(),
+                &wsh.address(groestlcoin::Network::Regtest).unwrap(),
                 btc(1),
                 None,
                 None,
@@ -169,8 +169,8 @@ pub fn test_from_cpp_ms(cl: &Client, testdata: &TestData) {
             .collect();
         // Get the required sighash message
         let amt = btc(1).to_sat();
-        let mut sighash_cache = bitcoin::util::sighash::SighashCache::new(&psbts[i].unsigned_tx);
-        let sighash_ty = bitcoin::EcdsaSighashType::All;
+        let mut sighash_cache = groestlcoin::util::sighash::SighashCache::new(&psbts[i].unsigned_tx);
+        let sighash_ty = groestlcoin::EcdsaSighashType::All;
         let sighash = sighash_cache
             .segwit_signature_hash(0, &ms.encode(), amt, sighash_ty)
             .unwrap();
@@ -185,7 +185,7 @@ pub fn test_from_cpp_ms(cl: &Client, testdata: &TestData) {
             let pk = pks[sks.iter().position(|&x| x == sk).unwrap()];
             psbts[i].inputs[0].partial_sigs.insert(
                 pk,
-                bitcoin::EcdsaSig {
+                groestlcoin::EcdsaSig {
                     sig,
                     hash_ty: sighash_ty,
                 },
@@ -217,7 +217,7 @@ pub fn test_from_cpp_ms(cl: &Client, testdata: &TestData) {
         } else {
             let tx = psbts[i].extract(&secp).unwrap();
 
-            // Send the transactions to bitcoin node for mining.
+            // Send the transactions to groestlcoin node for mining.
             // Regtest mode has standardness checks
             // Check whether the node accepts the transactions
             let txid = cl

@@ -13,7 +13,7 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::error;
 
-use bitcoin::{LockTime, PackedLockTime, Sequence};
+use groestlcoin::{LockTime, PackedLockTime, Sequence};
 
 pub use self::correctness::{Base, Correctness, Input};
 pub use self::extra_props::ExtData;
@@ -421,7 +421,7 @@ pub trait Property: Sized {
                 }
             }
             Terminal::After(t) => {
-                // Note that for CLTV this is a limitation not of Bitcoin but Miniscript. The
+                // Note that for CLTV this is a limitation not of Groestlcoin but Miniscript. The
                 // number on the stack would be a 5 bytes signed integer but Miniscript's B type
                 // only consumes 4 bytes from the stack.
                 if t == PackedLockTime::ZERO {
@@ -811,7 +811,7 @@ impl Property for Type {
                 }
             }
             Terminal::After(t) => {
-                // Note that for CLTV this is a limitation not of Bitcoin but Miniscript. The
+                // Note that for CLTV this is a limitation not of Groestlcoin but Miniscript. The
                 // number on the stack would be a 5 bytes signed integer but Miniscript's B type
                 // only consumes 4 bytes from the stack.
                 if t == PackedLockTime::ZERO {

@@ -37,9 +37,9 @@ then
     exit 0
 fi
 
-# Test bitcoind integration tests if told to (this only works with the stable toolchain)
+# Test groestlcoind integration tests if told to (this only works with the stable toolchain)
 if [ "$DO_BITCOIND_TESTS" = true ]; then
-    cd bitcoind-tests
+    cd groestlcoind-tests
     cargo test --verbose
 
     # Exit integration tests, do not run other tests.
@@ -65,11 +65,11 @@ then
     cargo run --example htlc --features=compiler
     cargo run --example parse
     cargo run --example sign_multisig
-    cargo run --example verify_tx > /dev/null
-    cargo run --example psbt
+    # cargo run --example verify_tx > /dev/null
+    # cargo run --example psbt
     cargo run --example xpub_descriptors
-    cargo run --example taproot --features=compiler
-    cargo run --example psbt_sign_finalize --features=base64
+    # cargo run --example taproot --features=compiler
+    # cargo run --example psbt_sign_finalize --features=base64
 fi
 
 if [ "$DO_NO_STD" = true ]

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: CC0-1.0
 
-use bitcoin::blockdata::script;
-use bitcoin::hashes::Hash;
-use bitcoin::{PubkeyHash, Script};
+use groestlcoin::blockdata::script;
+use groestlcoin::hashes::Hash;
+use groestlcoin::{PubkeyHash, Script};
 
 use crate::miniscript::context;
 use crate::prelude::*;
 use crate::{ScriptContext, ToPublicKey};
 pub(crate) fn varint_len(n: usize) -> usize {
-    bitcoin::VarInt(n as u64).len()
+    groestlcoin::VarInt(n as u64).len()
 }
 
 // Helper function to calculate witness size
@@ -30,13 +30,13 @@ pub(crate) fn witness_to_scriptsig(witness: &[Vec<u8>]) -> Script {
 
 // trait for pushing key that depend on context
 pub(crate) trait MsKeyBuilder {
-    /// Serialize the key as bytes based on script context. Used when encoding miniscript into bitcoin script
+    /// Serialize the key as bytes based on script context. Used when encoding miniscript into groestlcoin script
     fn push_ms_key<Pk, Ctx>(self, key: &Pk) -> Self
     where
         Pk: ToPublicKey,
         Ctx: ScriptContext;
 
-    /// Serialize the key hash as bytes based on script context. Used when encoding miniscript into bitcoin script
+    /// Serialize the key hash as bytes based on script context. Used when encoding miniscript into groestlcoin script
     fn push_ms_key_hash<Pk, Ctx>(self, key: &Pk) -> Self
     where
         Pk: ToPublicKey,

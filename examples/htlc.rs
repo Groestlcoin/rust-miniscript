@@ -16,13 +16,13 @@
 
 use std::str::FromStr;
 
-use bitcoin::Network;
+use groestlcoin::Network;
 use miniscript::descriptor::Wsh;
 use miniscript::policy::{Concrete, Liftable};
 
 fn main() {
     // HTLC policy with 10:1 odds for happy (co-operative) case compared to uncooperative case.
-    let htlc_policy = Concrete::<bitcoin::PublicKey>::from_str(&format!("or(10@and(sha256({secret_hash}),pk({redeem_identity})),1@and(older({expiry}),pk({refund_identity})))",
+    let htlc_policy = Concrete::<groestlcoin::PublicKey>::from_str(&format!("or(10@and(sha256({secret_hash}),pk({redeem_identity})),1@and(older({expiry}),pk({refund_identity})))",
                                                   secret_hash = "1111111111111111111111111111111111111111111111111111111111111111",
                                                   redeem_identity = "022222222222222222222222222222222222222222222222222222222222222222",
                                                   refund_identity = "020202020202020202020202020202020202020202020202020202020202020202",
@@ -37,7 +37,7 @@ fn main() {
     .expect("Resource limits");
 
     // Check whether the descriptor is safe. This checks whether all spend paths are accessible in
-    // the Bitcoin network. It may be possible that some of the spend paths require more than 100
+    // the Groestlcoin network. It may be possible that some of the spend paths require more than 100
     // elements in Wsh scripts or they contain a combination of timelock and heightlock.
     assert!(htlc_descriptor.sanity_check().is_ok());
     assert_eq!(
@@ -57,7 +57,7 @@ fn main() {
         "0020d853877af928a8d2a569c9c0ed14bd16f6a80ce9cccaf8a6150fd8f7f8867ae2"
     );
 
-    // Encode the Wsh descriptor into a Bitcoin script.
+    // Encode the Wsh descriptor into a Groestlcoin script.
     assert_eq!(
         format!("{:x}", htlc_descriptor.inner_script()),
         "21022222222222222222222222222222222222222222222222222222222222222222ac6476a91451814f108670aced2d77c1805ddd6634bc9d473188ad025c11b26782012088a82011111111111111111111111111111111111111111111111111111111111111118768"
@@ -65,7 +65,7 @@ fn main() {
 
     // Get the address for this Wsh descriptor.v
     assert_eq!(
-        format!("{}", htlc_descriptor.address(Network::Bitcoin)),
-        "bc1qmpfcw7he9z5d9ftfe8qw699azmm2sr8fen903fs4plv007yx0t3qxfmqv5"
+        format!("{}", htlc_descriptor.address(Network::Groestlcoin)),
+        "grs1qmpfcw7he9z5d9ftfe8qw699azmm2sr8fen903fs4plv007yx0t3qfjyvrs"
     );
 }

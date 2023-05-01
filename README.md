@@ -1,11 +1,11 @@
-![Build](https://github.com/rust-bitcoin/rust-miniscript/workflows/Continuous%20integration/badge.svg)
+![Build](https://github.com/Groestlcoin/rust-miniscript/workflows/Continuous%20integration/badge.svg)
 
 **Minimum Supported Rust Version:** 1.41.1
 
 # Miniscript
 
 Library for handling [Miniscript](http://bitcoin.sipa.be/miniscript/),
-which is a subset of Bitcoin Script designed to support simple and general
+which is a subset of Groestlcoin Script designed to support simple and general
 tooling. Miniscripts represent threshold circuits of spending conditions,
 and can therefore be easily visualized or serialized as human-readable
 strings.
@@ -14,19 +14,19 @@ strings.
 
 This library supports
 
-* [Output descriptors](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md)
+* [Output descriptors](https://github.com/Groestlcoin/groestlcoin/blob/master/doc/descriptors.md)
 including embedded Miniscripts
 * Parsing and serializing descriptors to a human-readable string format
 * Compilation of abstract spending policies to Miniscript (enabled by the
 `compiler` flag)
 * Semantic analysis of Miniscripts and spending policies, with user-defined
 public key types
-* Encoding and decoding Miniscript as Bitcoin Script, given key types that
-are convertible to `bitcoin::PublicKey`
+* Encoding and decoding Miniscript as Groestlcoin Script, given key types that
+are convertible to `groestlcoin::PublicKey`
 * Determining satisfiability, and optimal witnesses, for a given descriptor;
-completing an unsigned `bitcoin::TxIn` with appropriate data
+completing an unsigned `groestlcoin::TxIn` with appropriate data
 * Determining the specific keys, hash preimages and timelocks used to spend
-coins in a given Bitcoin transaction
+coins in a given Groestlcoin transaction
 * `no_std` support enabled by disabling the `default-features` and enabling
 `"no-std"`. See `embedded/` for an example.
 

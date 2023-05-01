@@ -11,10 +11,10 @@
 use core::fmt;
 use core::str::FromStr;
 
-use bitcoin::blockdata::witness::Witness;
-use bitcoin::hashes::{hash160, ripemd160, sha256};
-use bitcoin::util::{sighash, taproot};
-use bitcoin::{self, secp256k1, LockTime, Sequence, TxOut};
+use groestlcoin::blockdata::witness::Witness;
+use groestlcoin::hashes::{hash160, ripemd160, sha256};
+use groestlcoin::util::{sighash, taproot};
+use groestlcoin::{self, secp256k1, LockTime, Sequence, TxOut};
 
 use crate::miniscript::context::{NoChecks, SigType};
 use crate::miniscript::ScriptContext;
@@ -36,7 +36,7 @@ pub struct Interpreter<'txin> {
     stack: Stack<'txin>,
     /// For non-Taproot spends, the scriptCode; for Taproot script-spends, this
     /// is the leaf script; for key-spends it is `None`.
-    script_code: Option<bitcoin::Script>,
+    script_code: Option<groestlcoin::Script>,
     age: Sequence,
     lock_time: LockTime,
 }
@@ -44,26 +44,26 @@ pub struct Interpreter<'txin> {
 // A type representing functions for checking signatures that accept both
 // Ecdsa and Schnorr signatures
 
-/// A type for representing signatures supported as of bitcoin core 22.0
+/// A type for representing signatures supported as of groestlcoin core 22.0
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeySigPair {
     /// A Full public key and corresponding Ecdsa signature
-    Ecdsa(bitcoin::PublicKey, bitcoin::EcdsaSig),
+    Ecdsa(groestlcoin::PublicKey, groestlcoin::EcdsaSig),
     /// A x-only key and corresponding Schnorr signature
-    Schnorr(bitcoin::XOnlyPublicKey, bitcoin::SchnorrSig),
+    Schnorr(groestlcoin::XOnlyPublicKey, groestlcoin::SchnorrSig),
 }
 
 impl KeySigPair {
-    /// Obtain a pair of ([`bitcoin::PublicKey`], [`bitcoin::EcdsaSig`]) from [`KeySigPair`]
-    pub fn as_ecdsa(&self) -> Option<(bitcoin::PublicKey, bitcoin::EcdsaSig)> {
+    /// Obtain a pair of ([`groestlcoin::PublicKey`], [`groestlcoin::EcdsaSig`]) from [`KeySigPair`]
+    pub fn as_ecdsa(&self) -> Option<(groestlcoin::PublicKey, groestlcoin::EcdsaSig)> {
         match self {
             KeySigPair::Ecdsa(pk, sig) => Some((*pk, *sig)),
             KeySigPair::Schnorr(_, _) => None,
         }
     }
 
-    /// Obtain a pair of ([`bitcoin::XOnlyPublicKey`], [`bitcoin::SchnorrSig`]) from [`KeySigPair`]
-    pub fn as_schnorr(&self) -> Option<(bitcoin::XOnlyPublicKey, bitcoin::SchnorrSig)> {
+    /// Obtain a pair of ([`groestlcoin::XOnlyPublicKey`], [`groestlcoin::SchnorrSig`]) from [`KeySigPair`]
+    pub fn as_schnorr(&self) -> Option<(groestlcoin::XOnlyPublicKey, groestlcoin::SchnorrSig)> {
         match self {
             KeySigPair::Ecdsa(_, _) => None,
             KeySigPair::Schnorr(pk, sig) => Some((*pk, *sig)),
@@ -71,7 +71,7 @@ impl KeySigPair {
     }
 }
 
-// Internally used enum for different types of bitcoin keys
+// Internally used enum for different types of groestlcoin keys
 // Even though we implement MiniscriptKey for BitcoinKey, we make sure that there
 // are little mis-use
 // - The only constructors for this are only called in from_txdata that take care
@@ -86,9 +86,9 @@ impl KeySigPair {
 #[derive(Hash, Eq, Ord, PartialEq, PartialOrd, Clone, Copy, Debug)]
 enum BitcoinKey {
     // Full key
-    Fullkey(bitcoin::PublicKey),
+    Fullkey(groestlcoin::PublicKey),
     // Xonly key
-    XOnlyPublicKey(bitcoin::XOnlyPublicKey),
+    XOnlyPublicKey(groestlcoin::XOnlyPublicKey),
 }
 
 impl BitcoinKey {
@@ -110,14 +110,14 @@ impl fmt::Display for BitcoinKey {
     }
 }
 
-impl From<bitcoin::PublicKey> for BitcoinKey {
-    fn from(pk: bitcoin::PublicKey) -> Self {
+impl From<groestlcoin::PublicKey> for BitcoinKey {
+    fn from(pk: groestlcoin::PublicKey) -> Self {
         BitcoinKey::Fullkey(pk)
     }
 }
 
-impl From<bitcoin::XOnlyPublicKey> for BitcoinKey {
-    fn from(xpk: bitcoin::XOnlyPublicKey) -> Self {
+impl From<groestlcoin::XOnlyPublicKey> for BitcoinKey {
+    fn from(xpk: groestlcoin::XOnlyPublicKey) -> Self {
         BitcoinKey::XOnlyPublicKey(xpk)
     }
 }
@@ -141,8 +141,8 @@ impl<'txin> Interpreter<'txin> {
     /// function; otherwise, it should be a closure containing a sighash and
     /// secp context, which can actually verify a given signature.
     pub fn from_txdata(
-        spk: &bitcoin::Script,
-        script_sig: &'txin bitcoin::Script,
+        spk: &groestlcoin::Script,
+        script_sig: &'txin groestlcoin::Script,
         witness: &'txin Witness,
         age: Sequence,       // CSV, relative lock time.
         lock_time: LockTime, // CLTV, absolute lock time.
@@ -202,7 +202,7 @@ impl<'txin> Interpreter<'txin> {
     pub fn verify_sig<C: secp256k1::Verification, T: Borrow<TxOut>>(
         &self,
         secp: &secp256k1::Secp256k1<C>,
-        tx: &bitcoin::Transaction,
+        tx: &groestlcoin::Transaction,
         input_idx: usize,
         prevouts: &sighash::Prevouts<T>,
         sig: &KeySigPair,
@@ -222,7 +222,7 @@ impl<'txin> Interpreter<'txin> {
                 sighash::Prevouts::All(prevouts) => prevouts.get(input_index),
             }
         }
-        let mut cache = bitcoin::util::sighash::SighashCache::new(tx);
+        let mut cache = groestlcoin::util::sighash::SighashCache::new(tx);
         match sig {
             KeySigPair::Ecdsa(key, ecdsa_sig) => {
                 let script_pubkey = self.script_code.as_ref().expect("Legacy have script code");
@@ -296,7 +296,7 @@ impl<'txin> Interpreter<'txin> {
     pub fn iter<'iter, C: secp256k1::Verification, T: Borrow<TxOut>>(
         &'iter self,
         secp: &'iter secp256k1::Secp256k1<C>,
-        tx: &'txin bitcoin::Transaction,
+        tx: &'txin groestlcoin::Transaction,
         input_idx: usize,
         prevouts: &'iter sighash::Prevouts<T>, // actually a 'prevouts, but 'prevouts: 'iter
     ) -> Iter<'txin, 'iter> {
@@ -314,7 +314,7 @@ impl<'txin> Interpreter<'txin> {
     ///
     /// This may not represent the original descriptor used to produce the transaction,
     /// since it cannot distinguish between sorted and unsorted multisigs (and anyway
-    /// it can only see the final keys, keyorigin info is lost in serializing to Bitcoin).
+    /// it can only see the final keys, keyorigin info is lost in serializing to Groestlcoin).
     ///
     /// If you are using the interpreter as a sanity check on a transaction,
     /// it is worthwhile to try to parse this as a descriptor using `from_str`
@@ -432,9 +432,9 @@ impl<'txin> Interpreter<'txin> {
     ///
     /// This may not represent the original descriptor used to produce the transaction,
     /// since it cannot distinguish between sorted and unsorted multisigs (and anyway
-    /// it can only see the final keys, keyorigin info is lost in serializing to Bitcoin).
-    /// x-only keys are translated to [`bitcoin::PublicKey`] with 0x02 prefix.
-    pub fn inferred_descriptor(&self) -> Result<Descriptor<bitcoin::PublicKey>, crate::Error> {
+    /// it can only see the final keys, keyorigin info is lost in serializing to Groestlcoin).
+    /// x-only keys are translated to [`groestlcoin::PublicKey`] with 0x02 prefix.
+    pub fn inferred_descriptor(&self) -> Result<Descriptor<groestlcoin::PublicKey>, crate::Error> {
         Descriptor::from_str(&self.inferred_descriptor_string())
     }
 }
@@ -1012,7 +1012,7 @@ fn verify_sersig<'txin>(
 ) -> Result<KeySigPair, Error> {
     match pk {
         BitcoinKey::Fullkey(pk) => {
-            let ecdsa_sig = bitcoin::EcdsaSig::from_slice(sigser)?;
+            let ecdsa_sig = groestlcoin::EcdsaSig::from_slice(sigser)?;
             let key_sig_pair = KeySigPair::Ecdsa(*pk, ecdsa_sig);
             if verify_sig(&key_sig_pair) {
                 Ok(key_sig_pair)
@@ -1021,7 +1021,7 @@ fn verify_sersig<'txin>(
             }
         }
         BitcoinKey::XOnlyPublicKey(x_only_pk) => {
-            let schnorr_sig = bitcoin::SchnorrSig::from_slice(sigser)?;
+            let schnorr_sig = groestlcoin::SchnorrSig::from_slice(sigser)?;
             let key_sig_pair = KeySigPair::Schnorr(*x_only_pk, schnorr_sig);
             if verify_sig(&key_sig_pair) {
                 Ok(key_sig_pair)
@@ -1035,9 +1035,9 @@ fn verify_sersig<'txin>(
 #[cfg(test)]
 mod tests {
 
-    use bitcoin;
-    use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
-    use bitcoin::secp256k1::{self, Secp256k1};
+    use groestlcoin;
+    use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
+    use groestlcoin::secp256k1::{self, Secp256k1};
 
     use super::inner::ToNoChecks;
     use super::*;
@@ -1048,13 +1048,13 @@ mod tests {
     fn setup_keys_sigs(
         n: usize,
     ) -> (
-        Vec<bitcoin::PublicKey>,
+        Vec<groestlcoin::PublicKey>,
         Vec<Vec<u8>>,
-        Vec<bitcoin::EcdsaSig>,
+        Vec<groestlcoin::EcdsaSig>,
         secp256k1::Message,
         Secp256k1<secp256k1::All>,
-        Vec<bitcoin::XOnlyPublicKey>,
-        Vec<bitcoin::SchnorrSig>,
+        Vec<groestlcoin::XOnlyPublicKey>,
+        Vec<groestlcoin::SchnorrSig>,
         Vec<Vec<u8>>,
     ) {
         let secp = secp256k1::Secp256k1::new();
@@ -1074,27 +1074,27 @@ mod tests {
             sk[2] = (i >> 16) as u8;
 
             let sk = secp256k1::SecretKey::from_slice(&sk[..]).expect("secret key");
-            let pk = bitcoin::PublicKey {
+            let pk = groestlcoin::PublicKey {
                 inner: secp256k1::PublicKey::from_secret_key(&secp, &sk),
                 compressed: true,
             };
             let sig = secp.sign_ecdsa(&msg, &sk);
-            ecdsa_sigs.push(bitcoin::EcdsaSig {
+            ecdsa_sigs.push(groestlcoin::EcdsaSig {
                 sig,
-                hash_ty: bitcoin::EcdsaSighashType::All,
+                hash_ty: groestlcoin::EcdsaSighashType::All,
             });
             let mut sigser = sig.serialize_der().to_vec();
             sigser.push(0x01); // sighash_all
             pks.push(pk);
             der_sigs.push(sigser);
 
-            let keypair = bitcoin::KeyPair::from_secret_key(&secp, &sk);
-            let (x_only_pk, _parity) = bitcoin::XOnlyPublicKey::from_keypair(&keypair);
+            let keypair = groestlcoin::KeyPair::from_secret_key(&secp, &sk);
+            let (x_only_pk, _parity) = groestlcoin::XOnlyPublicKey::from_keypair(&keypair);
             x_only_pks.push(x_only_pk);
             let schnorr_sig = secp.sign_schnorr_with_aux_rand(&msg, &keypair, &[0u8; 32]);
-            let schnorr_sig = bitcoin::SchnorrSig {
+            let schnorr_sig = groestlcoin::SchnorrSig {
                 sig: schnorr_sig,
-                hash_ty: bitcoin::SchnorrSighashType::Default,
+                hash_ty: groestlcoin::SchnorrSighashType::Default,
             };
             ser_schnorr_sigs.push(schnorr_sig.to_vec());
             schnorr_sigs.push(schnorr_sig);
@@ -1579,13 +1579,13 @@ mod tests {
     // because it does not implement FromStr
     fn no_checks_ms(ms: &str) -> Miniscript<BitcoinKey, NoChecks> {
         // Parsing should allow raw hashes in the interpreter
-        let elem: Miniscript<bitcoin::PublicKey, NoChecks> =
+        let elem: Miniscript<groestlcoin::PublicKey, NoChecks> =
             Miniscript::from_str_ext(ms, &ExtParams::allow_all()).unwrap();
         elem.to_no_checks_ms()
     }
 
     fn x_only_no_checks_ms(ms: &str) -> Miniscript<BitcoinKey, NoChecks> {
-        let elem: Miniscript<bitcoin::XOnlyPublicKey, NoChecks> =
+        let elem: Miniscript<groestlcoin::XOnlyPublicKey, NoChecks> =
             Miniscript::from_str_ext(ms, &ExtParams::allow_all()).unwrap();
         elem.to_no_checks_ms()
     }

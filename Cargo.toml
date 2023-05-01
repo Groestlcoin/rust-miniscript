@@ -1,29 +1,29 @@
 [package]
 name = "miniscript"
 version = "9.0.0"
-authors = ["Andrew Poelstra <apoelstra@wpsoftware.net>, Sanket Kanjalkar <sanket1729@gmail.com>"]
+authors = ["Groestlcoin Developers <groestlcoin@gmail.com>"]
 license = "CC0-1.0"
-homepage = "https://github.com/rust-bitcoin/rust-miniscript/"
-repository = "https://github.com/rust-bitcoin/rust-miniscript/"
-description = "Miniscript: a subset of Bitcoin Script designed for analysis"
-keywords = [ "crypto", "bitcoin", "miniscript", "script" ]
+homepage = "https://github.com/Groestlcoin/rust-miniscript/"
+repository = "https://github.com/Groestlcoin/rust-miniscript/"
+description = "Miniscript: a subset of Groestlcoin Script designed for analysis"
+keywords = [ "crypto", "groestlcoin", "miniscript", "script" ]
 readme = "README.md"
 edition = "2018"
 
 [features]
 default = ["std"]
-std = ["bitcoin/std", "bitcoin/secp-recovery"]
-no-std = ["hashbrown", "bitcoin/no-std"]
+std = ["groestlcoin/std", "groestlcoin/secp-recovery"]
+no-std = ["hashbrown", "groestlcoin/no-std"]
 compiler = []
 trace = []
 
 unstable = []
-serde = ["actual-serde", "bitcoin/serde"]
-rand = ["bitcoin/rand"]
-base64 = ["bitcoin/base64"]
+serde = ["actual-serde", "groestlcoin/serde"]
+rand = ["groestlcoin/rand"]
+base64 = ["groestlcoin/base64"]
 
 [dependencies]
-bitcoin = { version = "0.29.1", default-features = false }
+groestlcoin = { version = "0.29.0", default-features = false }
 hashbrown = { version = "0.11", optional = true }
 
 # Do NOT use this as a feature! Use the `serde` feature instead.
@@ -31,7 +31,7 @@ actual-serde = { package = "serde", version = "1.0.103", optional = true }
 
 [dev-dependencies]
 serde_test = "1.0.147"
-bitcoin = { version = "0.29.2", features = ["base64"] }
+groestlcoin = { version = "0.29.0", features = ["base64"] }
 secp256k1 = {version = "0.24.0", features = ["rand-std"]}
 actual-base64 = { package = "base64", version = "0.13.0" }
 

@@ -3,10 +3,10 @@
 
 //! Miniscript and Output Descriptors
 //!
-//! ## Bitcoin Script
+//! ## Groestlcoin Script
 //!
-//! In Bitcoin, spending policies are defined and enforced by means of a
-//! stack-based programming language known as Bitcoin Script. While this
+//! In Groestlcoin, spending policies are defined and enforced by means of a
+//! stack-based programming language known as Groestlcoin Script. While this
 //! language appears to be designed with tractable analysis in mind (e.g.
 //! there are no looping or jumping constructions), in practice this is
 //! extremely difficult. As a result, typical wallet software supports only
@@ -18,9 +18,9 @@
 //!
 //! ## Miniscript
 //!
-//! Miniscript is an alternative to Bitcoin Script which eliminates these
+//! Miniscript is an alternative to Groestlcoin Script which eliminates these
 //! problems. It can be efficiently and simply encoded as Script to ensure
-//! that it works on the Bitcoin blockchain, but its design is very different.
+//! that it works on the Groestlcoin blockchain, but its design is very different.
 //! Essentially, a Miniscript is a monotone function (tree of ANDs, ORs and
 //! thresholds) of signature requirements, hash preimage requirements, and
 //! timelocks.
@@ -31,10 +31,10 @@
 //!
 //! ## Output Descriptors
 //!
-//! While spending policies in Bitcoin are entirely defined by Script; there
+//! While spending policies in Groestlcoin are entirely defined by Script; there
 //! are multiple ways of embedding these Scripts in transaction outputs; for
 //! example, P2SH or Segwit v0. These different embeddings are expressed by
-//! *Output Descriptors*, [which are described here](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md).
+//! *Output Descriptors*, [which are described here](https://github.com/Groestlcoin/groestlcoin/blob/master/doc/descriptors.md).
 //!
 //! # Examples
 //!
@@ -43,7 +43,7 @@
 //! ```rust
 //! use std::str::FromStr;
 //!
-//! let desc = miniscript::Descriptor::<bitcoin::PublicKey>::from_str("\
+//! let desc = miniscript::Descriptor::<groestlcoin::PublicKey>::from_str("\
 //!     sh(wsh(or_d(\
 //!     c:pk_k(020e0338c96a8870479f2396c373cc7696ba124e8635d41b0ea581112b67817261),\
 //!     c:pk_k(0250863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b2352)\
@@ -52,12 +52,12 @@
 //!
 //! // Derive the P2SH address.
 //! assert_eq!(
-//!     desc.address(bitcoin::Network::Bitcoin).unwrap().to_string(),
-//!     "3CJxbQBfWAe1ZkKiGQNEYrioV73ZwvBWns"
+//!     desc.address(groestlcoin::Network::Groestlcoin).unwrap().to_string(),
+//!     "3CJxbQBfWAe1ZkKiGQNEYrioV73ZvMViuT"
 //! );
 //!
 //! // Check whether the descriptor is safe. This checks whether all spend paths are accessible in
-//! // the Bitcoin network. It may be possible that some of the spend paths require more than 100
+//! // the Groestlcoin network. It may be possible that some of the spend paths require more than 100
 //! // elements in Wsh scripts or they contain a combination of timelock and heightlock.
 //! assert!(desc.sanity_check().is_ok());
 //!
@@ -93,7 +93,7 @@ compile_error!(
 #[cfg(not(any(feature = "std", feature = "no-std")))]
 compile_error!("at least one of the `std` or `no-std` features must be enabled");
 
-pub use bitcoin;
+pub use groestlcoin;
 
 #[cfg(not(feature = "std"))]
 #[macro_use]
@@ -133,8 +133,8 @@ use core::{fmt, hash, str};
 #[cfg(feature = "std")]
 use std::error;
 
-use bitcoin::blockdata::{opcodes, script};
-use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use groestlcoin::blockdata::{opcodes, script};
+use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 
 pub use crate::descriptor::{DefiniteDescriptorKey, Descriptor, DescriptorPublicKey};
 pub use crate::interpreter::Interpreter;
@@ -163,7 +163,7 @@ pub trait MiniscriptKey: Clone + Eq + Ord + fmt::Debug + fmt::Display + hash::Ha
     /// in BIP389 multipath descriptors.
     fn num_der_paths(&self) -> usize;
 
-    /// The associated [`bitcoin::hashes::sha256::Hash`] for this [`MiniscriptKey`], used in the
+    /// The associated [`groestlcoin::hashes::sha256::Hash`] for this [`MiniscriptKey`], used in the
     /// sha256 fragment.
     type Sha256: Clone + Eq + Ord + fmt::Display + fmt::Debug + hash::Hash;
 
@@ -171,16 +171,16 @@ pub trait MiniscriptKey: Clone + Eq + Ord + fmt::Debug + fmt::Display + hash::Ha
     /// hash256 fragment.
     type Hash256: Clone + Eq + Ord + fmt::Display + fmt::Debug + hash::Hash;
 
-    /// The associated [`bitcoin::hashes::ripemd160::Hash`] for this [`MiniscriptKey`] type, used
+    /// The associated [`groestlcoin::hashes::ripemd160::Hash`] for this [`MiniscriptKey`] type, used
     /// in the ripemd160 fragment.
     type Ripemd160: Clone + Eq + Ord + fmt::Display + fmt::Debug + hash::Hash;
 
-    /// The associated [`bitcoin::hashes::hash160::Hash`] for this [`MiniscriptKey`] type, used in
+    /// The associated [`groestlcoin::hashes::hash160::Hash`] for this [`MiniscriptKey`] type, used in
     /// the hash160 fragment.
     type Hash160: Clone + Eq + Ord + fmt::Display + fmt::Debug + hash::Hash;
 }
 
-impl MiniscriptKey for bitcoin::secp256k1::PublicKey {
+impl MiniscriptKey for groestlcoin::secp256k1::PublicKey {
     type Sha256 = sha256::Hash;
     type Hash256 = hash256::Hash;
     type Ripemd160 = ripemd160::Hash;
@@ -191,7 +191,7 @@ impl MiniscriptKey for bitcoin::secp256k1::PublicKey {
     }
 }
 
-impl MiniscriptKey for bitcoin::PublicKey {
+impl MiniscriptKey for groestlcoin::PublicKey {
     /// Returns the compressed-ness of the underlying secp256k1 key.
     fn is_uncompressed(&self) -> bool {
         !self.compressed
@@ -207,7 +207,7 @@ impl MiniscriptKey for bitcoin::PublicKey {
     type Hash160 = hash160::Hash;
 }
 
-impl MiniscriptKey for bitcoin::secp256k1::XOnlyPublicKey {
+impl MiniscriptKey for groestlcoin::secp256k1::XOnlyPublicKey {
     type Sha256 = sha256::Hash;
     type Hash256 = hash256::Hash;
     type Ripemd160 = ripemd160::Hash;
@@ -233,15 +233,15 @@ impl MiniscriptKey for String {
     }
 }
 
-/// Trait describing public key types which can be converted to bitcoin pubkeys
+/// Trait describing public key types which can be converted to groestlcoin pubkeys
 pub trait ToPublicKey: MiniscriptKey {
     /// Converts an object to a public key
-    fn to_public_key(&self) -> bitcoin::PublicKey;
+    fn to_public_key(&self) -> groestlcoin::PublicKey;
 
     /// Convert an object to x-only pubkey
-    fn to_x_only_pubkey(&self) -> bitcoin::secp256k1::XOnlyPublicKey {
+    fn to_x_only_pubkey(&self) -> groestlcoin::secp256k1::XOnlyPublicKey {
         let pk = self.to_public_key();
-        bitcoin::secp256k1::XOnlyPublicKey::from(pk.inner)
+        groestlcoin::secp256k1::XOnlyPublicKey::from(pk.inner)
     }
 
     /// Obtain the public key hash for this MiniscriptKey
@@ -268,8 +268,8 @@ pub trait ToPublicKey: MiniscriptKey {
     fn to_hash160(hash: &<Self as MiniscriptKey>::Hash160) -> hash160::Hash;
 }
 
-impl ToPublicKey for bitcoin::PublicKey {
-    fn to_public_key(&self) -> bitcoin::PublicKey {
+impl ToPublicKey for groestlcoin::PublicKey {
+    fn to_public_key(&self) -> groestlcoin::PublicKey {
         *self
     }
 
@@ -290,9 +290,9 @@ impl ToPublicKey for bitcoin::PublicKey {
     }
 }
 
-impl ToPublicKey for bitcoin::secp256k1::PublicKey {
-    fn to_public_key(&self) -> bitcoin::PublicKey {
-        bitcoin::PublicKey::new(*self)
+impl ToPublicKey for groestlcoin::secp256k1::PublicKey {
+    fn to_public_key(&self) -> groestlcoin::PublicKey {
+        groestlcoin::PublicKey::new(*self)
     }
 
     fn to_sha256(hash: &sha256::Hash) -> sha256::Hash {
@@ -312,17 +312,17 @@ impl ToPublicKey for bitcoin::secp256k1::PublicKey {
     }
 }
 
-impl ToPublicKey for bitcoin::secp256k1::XOnlyPublicKey {
-    fn to_public_key(&self) -> bitcoin::PublicKey {
+impl ToPublicKey for groestlcoin::secp256k1::XOnlyPublicKey {
+    fn to_public_key(&self) -> groestlcoin::PublicKey {
         // This code should never be used.
         // But is implemented for completeness
         let mut data: Vec<u8> = vec![0x02];
         data.extend(self.serialize().iter());
-        bitcoin::PublicKey::from_slice(&data)
+        groestlcoin::PublicKey::from_slice(&data)
             .expect("Failed to construct 33 Publickey from 0x02 appended x-only key")
     }
 
-    fn to_x_only_pubkey(&self) -> bitcoin::secp256k1::XOnlyPublicKey {
+    fn to_x_only_pubkey(&self) -> groestlcoin::secp256k1::XOnlyPublicKey {
         *self
     }
 
@@ -422,10 +422,10 @@ pub enum Error {
     NonMinimalVerify(String),
     /// Push was illegal in some context
     InvalidPush(Vec<u8>),
-    /// rust-bitcoin script error
+    /// rust-groestlcoin script error
     Script(script::Error),
-    /// rust-bitcoin address error
-    AddrError(bitcoin::util::address::Error),
+    /// rust-groestlcoin address error
+    AddrError(groestlcoin::util::address::Error),
     /// A `CHECKMULTISIG` opcode was preceded by a number > 20
     CmsTooManyKeys(u32),
     /// A tapscript multi_a cannot support more than MAX_BLOCK_WEIGHT/32 keys
@@ -453,11 +453,11 @@ pub enum Error {
     /// Parsed a miniscript but there were more script opcodes after it
     Trailing(String),
     /// Failed to parse a push as a public key
-    BadPubkey(bitcoin::util::key::Error),
+    BadPubkey(groestlcoin::util::key::Error),
     /// Could not satisfy a script (fragment) because of a missing hash preimage
     MissingHash(sha256::Hash),
     /// Could not satisfy a script (fragment) because of a missing signature
-    MissingSig(bitcoin::PublicKey),
+    MissingSig(groestlcoin::PublicKey),
     /// Could not satisfy, relative locktime not met
     RelativeLocktimeNotMet(u32),
     /// Could not satisfy, absolute locktime not met
@@ -469,7 +469,7 @@ pub enum Error {
     /// General error in creating descriptor
     BadDescriptor(String),
     /// Forward-secp related errors
-    Secp(bitcoin::secp256k1::Error),
+    Secp(groestlcoin::secp256k1::Error),
     #[cfg(feature = "compiler")]
     /// Compiler related errors
     CompilerError(crate::policy::compiler::CompilerError),
@@ -517,7 +517,7 @@ impl fmt::Display for Error {
             Error::NonMinimalVerify(ref tok) => write!(f, "{} VERIFY", tok),
             Error::InvalidPush(ref push) => {
                 write!(f, "invalid push ")?;
-                bitcoin::hashes::hex::format_hex(push, f)
+                groestlcoin::hashes::hex::format_hex(push, f)
             },
             Error::Script(ref e) => fmt::Display::fmt(e, f),
             Error::AddrError(ref e) => fmt::Display::fmt(e, f),
@@ -560,7 +560,7 @@ impl fmt::Display for Error {
             ),
             Error::ScriptSizeTooLarge => write!(
                 f,
-                "Standardness rules imply bitcoin than {} bytes",
+                "Standardness rules imply groestlcoin than {} bytes",
                 MAX_SCRIPT_SIZE
             ),
             Error::NonStandardBareScript => write!(
@@ -670,15 +670,15 @@ impl From<miniscript::analyzable::AnalysisError> for Error {
 }
 
 #[doc(hidden)]
-impl From<bitcoin::secp256k1::Error> for Error {
-    fn from(e: bitcoin::secp256k1::Error) -> Error {
+impl From<groestlcoin::secp256k1::Error> for Error {
+    fn from(e: groestlcoin::secp256k1::Error) -> Error {
         Error::Secp(e)
     }
 }
 
 #[doc(hidden)]
-impl From<bitcoin::util::address::Error> for Error {
-    fn from(e: bitcoin::util::address::Error) -> Error {
+impl From<groestlcoin::util::address::Error> for Error {
+    fn from(e: groestlcoin::util::address::Error) -> Error {
         Error::AddrError(e)
     }
 }
@@ -733,9 +733,9 @@ fn push_opcode_size(script_size: usize) -> usize {
 
 /// Helper function used by tests
 #[cfg(test)]
-fn hex_script(s: &str) -> bitcoin::Script {
-    let v: Vec<u8> = bitcoin::hashes::hex::FromHex::from_hex(s).unwrap();
-    bitcoin::Script::from(v)
+fn hex_script(s: &str) -> groestlcoin::Script {
+    let v: Vec<u8> = groestlcoin::hashes::hex::FromHex::from_hex(s).unwrap();
+    groestlcoin::Script::from(v)
 }
 
 #[cfg(test)]
@@ -746,7 +746,7 @@ mod tests {
 
     #[test]
     fn regression_bitcoin_key_hash() {
-        use bitcoin::PublicKey;
+        use groestlcoin::PublicKey;
 
         // Uncompressed key.
         let pk = PublicKey::from_str(
@@ -760,7 +760,7 @@ mod tests {
 
     #[test]
     fn regression_secp256k1_key_hash() {
-        use bitcoin::secp256k1::PublicKey;
+        use groestlcoin::secp256k1::PublicKey;
 
         // Compressed key.
         let pk = PublicKey::from_str(
@@ -775,7 +775,7 @@ mod tests {
 
     #[test]
     fn regression_xonly_key_hash() {
-        use bitcoin::secp256k1::XOnlyPublicKey;
+        use groestlcoin::secp256k1::XOnlyPublicKey;
 
         let pk = XOnlyPublicKey::from_str(
             "cc8a4bc64d897bddc5fbc2f670f7a8ba0b386779106cf1223c6fc5d7cd6fc115",

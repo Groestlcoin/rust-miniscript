@@ -20,13 +20,13 @@ use miniscript::descriptor::DescriptorType;
 use miniscript::Descriptor;
 
 fn main() {
-    let desc = miniscript::Descriptor::<bitcoin::PublicKey>::from_str(
+    let desc = miniscript::Descriptor::<groestlcoin::PublicKey>::from_str(
         "wsh(c:pk_k(020202020202020202020202020202020202020202020202020202020202020202))",
     )
     .unwrap();
 
     // Check whether the descriptor is safe. This checks whether all spend paths are accessible in
-    // the Bitcoin network. It may be possible that some of the spend paths require more than 100
+    // the Groestlcoin network. It may be possible that some of the spend paths require more than 100
     // elements in Wsh scripts or they contain a combination of timelock and heightlock.
     assert!(desc.sanity_check().is_ok());
 
@@ -60,7 +60,7 @@ fn main() {
     );
 
     // In a similar fashion we can parse a wrapped segwit script.
-    let desc = miniscript::Descriptor::<bitcoin::PublicKey>::from_str(
+    let desc = miniscript::Descriptor::<groestlcoin::PublicKey>::from_str(
         "sh(wsh(c:pk_k(020202020202020202020202020202020202020202020202020202020202020202)))",
     )
     .unwrap();

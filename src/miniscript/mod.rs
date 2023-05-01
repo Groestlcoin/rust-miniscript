@@ -4,7 +4,7 @@
 //! # Abstract Syntax Tree
 //!
 //! Defines a variety of data structures for describing Miniscript, a subset of
-//! Bitcoin Script which can be efficiently parsed and serialized from Script,
+//! Groestlcoin Script which can be efficiently parsed and serialized from Script,
 //! and from which it is easy to extract data needed to construct witnesses.
 //!
 //! Users of the library in general will only need to use the structures exposed
@@ -16,8 +16,8 @@
 use core::marker::PhantomData;
 use core::{fmt, hash, str};
 
-use bitcoin::blockdata::script;
-use bitcoin::util::taproot::{LeafVersion, TapLeafHash};
+use groestlcoin::blockdata::script;
+use groestlcoin::util::taproot::{LeafVersion, TapLeafHash};
 
 use self::analyzable::ExtParams;
 pub use self::context::{BareCtx, Legacy, Segwitv0, Tap};
@@ -186,24 +186,24 @@ impl<Ctx: ScriptContext> Miniscript<Ctx::Key, Ctx> {
     ///
     /// ```rust
     /// use miniscript::{Miniscript, Segwitv0, Tap};
-    /// use miniscript::bitcoin::secp256k1::XOnlyPublicKey;
-    /// use miniscript::bitcoin::hashes::hex::FromHex;
+    /// use miniscript::groestlcoin::secp256k1::XOnlyPublicKey;
+    /// use miniscript::groestlcoin::hashes::hex::FromHex;
     ///
-    /// type Segwitv0Script = Miniscript<bitcoin::PublicKey, Segwitv0>;
+    /// type Segwitv0Script = Miniscript<groestlcoin::PublicKey, Segwitv0>;
     /// type TapScript = Miniscript<XOnlyPublicKey, Tap>;
     ///
     /// // parse x-only miniscript in Taproot context
-    /// let tapscript_ms = TapScript::parse(&bitcoin::Script::from(Vec::<u8>::from_hex(
+    /// let tapscript_ms = TapScript::parse(&groestlcoin::Script::from(Vec::<u8>::from_hex(
     ///     "202788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99ac",
     /// ).expect("Even length hex")))
     ///     .expect("Xonly keys are valid only in taproot context");
     /// // tapscript fails decoding when we use them with compressed keys
-    /// let err = TapScript::parse(&bitcoin::Script::from(Vec::<u8>::from_hex(
+    /// let err = TapScript::parse(&groestlcoin::Script::from(Vec::<u8>::from_hex(
     ///     "21022788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99ac",
     /// ).expect("Even length hex")))
     ///     .expect_err("Compressed keys cannot be used in Taproot context");
     /// // Segwitv0 succeeds decoding with full keys.
-    /// Segwitv0Script::parse(&bitcoin::Script::from(Vec::<u8>::from_hex(
+    /// Segwitv0Script::parse(&groestlcoin::Script::from(Vec::<u8>::from_hex(
     ///     "21022788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99ac",
     /// ).expect("Even length hex")))
     ///     .expect("Compressed keys are allowed in Segwit context");
@@ -220,7 +220,7 @@ where
     Pk: MiniscriptKey,
     Ctx: ScriptContext,
 {
-    /// Encode as a Bitcoin script
+    /// Encode as a Groestlcoin script
     pub fn encode(&self) -> script::Script
     where
         Pk: ToPublicKey,
@@ -460,10 +460,10 @@ serde_string_impl_pk!(Miniscript, "a miniscript", Ctx; ScriptContext);
 
 /// Provides a Double SHA256 `Hash` type that displays forwards.
 pub mod hash256 {
-    use bitcoin::hashes::{hash_newtype, sha256d};
+    use groestlcoin::hashes::{hash_newtype, sha256d};
 
     #[rustfmt::skip]
-    hash_newtype!(Hash, sha256d::Hash, 32, doc = "A bitcoin block hash.", false);
+    hash_newtype!(Hash, sha256d::Hash, 32, doc = "A groestlcoin block hash.", false);
 }
 
 #[cfg(test)]
@@ -473,10 +473,10 @@ mod tests {
     use core::str;
     use core::str::FromStr;
 
-    use bitcoin::hashes::{hash160, sha256, Hash};
-    use bitcoin::secp256k1::XOnlyPublicKey;
-    use bitcoin::util::taproot::TapLeafHash;
-    use bitcoin::{self, secp256k1, Sequence};
+    use groestlcoin::hashes::{hash160, sha256, Hash};
+    use groestlcoin::secp256k1::XOnlyPublicKey;
+    use groestlcoin::util::taproot::TapLeafHash;
+    use groestlcoin::{self, secp256k1, Sequence};
     use sync::Arc;
 
     use super::{Miniscript, ScriptContext, Segwitv0, Tap};
@@ -487,10 +487,10 @@ mod tests {
     use crate::test_utils::{StrKeyTranslator, StrXOnlyKeyTranslator};
     use crate::{hex_script, ExtParams, Satisfier, ToPublicKey, TranslatePk};
 
-    type Segwitv0Script = Miniscript<bitcoin::PublicKey, Segwitv0>;
-    type Tapscript = Miniscript<bitcoin::secp256k1::XOnlyPublicKey, Tap>;
+    type Segwitv0Script = Miniscript<groestlcoin::PublicKey, Segwitv0>;
+    type Tapscript = Miniscript<groestlcoin::secp256k1::XOnlyPublicKey, Tap>;
 
-    fn pubkeys(n: usize) -> Vec<bitcoin::PublicKey> {
+    fn pubkeys(n: usize) -> Vec<groestlcoin::PublicKey> {
         let mut ret = Vec::with_capacity(n);
         let secp = secp256k1::Secp256k1::new();
         let mut sk = [0; 32];
@@ -499,7 +499,7 @@ mod tests {
             sk[1] = (i >> 8) as u8;
             sk[2] = (i >> 16) as u8;
 
-            let pk = bitcoin::PublicKey {
+            let pk = groestlcoin::PublicKey {
                 inner: secp256k1::PublicKey::from_secret_key(
                     &secp,
                     &secp256k1::SecretKey::from_slice(&sk[..]).expect("secret key"),
@@ -512,7 +512,7 @@ mod tests {
     }
 
     fn string_rtt<Ctx: ScriptContext>(
-        script: Miniscript<bitcoin::PublicKey, Ctx>,
+        script: Miniscript<groestlcoin::PublicKey, Ctx>,
         expected_debug: &str,
         expected_display: &str,
     ) {
@@ -530,7 +530,7 @@ mod tests {
     }
 
     fn string_display_debug_test<Ctx: ScriptContext>(
-        script: Miniscript<bitcoin::PublicKey, Ctx>,
+        script: Miniscript<groestlcoin::PublicKey, Ctx>,
         expected_debug: &str,
         expected_display: &str,
     ) {
@@ -658,7 +658,7 @@ mod tests {
 
     #[test]
     fn basic() {
-        let pk = bitcoin::PublicKey::from_str(
+        let pk = groestlcoin::PublicKey::from_str(
             "\
              020202020202020202020202020202020202020202020202020202020202020202\
              ",
@@ -1011,14 +1011,14 @@ mod tests {
         )
         .unwrap();
 
-        // Now test that bitcoin::PublicKey works with Taproot context
-        Miniscript::<bitcoin::PublicKey, Tap>::from_str_insane(
+        // Now test that groestlcoin::PublicKey works with Taproot context
+        Miniscript::<groestlcoin::PublicKey, Tap>::from_str_insane(
             "pk(022788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99)",
         )
         .unwrap();
 
         // uncompressed keys should not be allowed
-        Miniscript::<bitcoin::PublicKey, Tap>::from_str_insane(
+        Miniscript::<groestlcoin::PublicKey, Tap>::from_str_insane(
             "pk(04eed24a081bf1b1e49e3300df4bebe04208ac7e516b6f3ea8eb6e094584267c13483f89dcf194132e12238cc5a34b6b286fc7990d68ed1db86b69ebd826c63b29)"
         )
         .unwrap_err();
@@ -1091,10 +1091,10 @@ mod tests {
                 &self,
                 _pk: &Pk,
                 _h: &TapLeafHash,
-            ) -> Option<bitcoin::SchnorrSig> {
-                Some(bitcoin::SchnorrSig {
+            ) -> Option<groestlcoin::SchnorrSig> {
+                Some(groestlcoin::SchnorrSig {
                     sig: self.0,
-                    hash_ty: bitcoin::SchnorrSighashType::Default,
+                    hash_ty: groestlcoin::SchnorrSighashType::Default,
                 })
             }
         }
@@ -1114,7 +1114,7 @@ mod tests {
         .unwrap();
         let ms_trans = ms.translate_pk(&mut StrKeyTranslator::new()).unwrap();
         let enc = ms_trans.encode();
-        let ms = Miniscript::<bitcoin::PublicKey, Segwitv0>::parse_insane(&enc).unwrap();
+        let ms = Miniscript::<groestlcoin::PublicKey, Segwitv0>::parse_insane(&enc).unwrap();
         assert_eq!(ms_trans.encode(), ms.encode());
     }
 
@@ -1123,7 +1123,7 @@ mod tests {
         // test that parsing raw hash160 does not work with
         let hash160_str = "e9f171df53e04b270fa6271b42f66b0f4a99c5a2";
         let ms_str = &format!("c:expr_raw_pkh({})", hash160_str);
-        type SegwitMs = Miniscript<bitcoin::PublicKey, Segwitv0>;
+        type SegwitMs = Miniscript<groestlcoin::PublicKey, Segwitv0>;
 
         // Test that parsing raw hash160 from string does not work without extra features
         SegwitMs::from_str(ms_str).unwrap_err();

@@ -1,6 +1,6 @@
 ## Miniscript Compiler
 
-This library provides a Policy compiler that converts bitcoin Policy to Miniscript which can
+This library provides a Policy compiler that converts groestlcoin Policy to Miniscript which can
 be used with "compiler" feature. The compiler offers a simple way to interface with
 Miniscript and often the first place beginners start to play with Miniscript. There are
 however several limitations and caveats to the compiler. This document tries to explain the compiler

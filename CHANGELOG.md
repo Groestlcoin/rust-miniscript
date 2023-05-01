@@ -16,7 +16,7 @@ support for Miniscript is **not** standardized and is subject to change in
 the future. See [this gist](https://gist.github.com/sipa/06c5c844df155d4e5044c2c8cac9c05e)
 for our thinking regarding this at the time of release.
 
-- Works with bitcoin crate 0.29
+- Works with groestlcoin crate 0.29
 - Correctly [return an error when `SortedMulti` is constructed with too many keys](https://github.com/rust-bitcoin/rust-miniscript/pull/366/)
 - Cleanly separate [`experimental/insane miniscripts`](https://github.com/rust-bitcoin/rust-miniscript/pull/461) from sane miniscripts.
 - allow disabling the checksum with [`alternate Display`](https://github.com/rust-bitcoin/rust-miniscript/pull/478)
@@ -36,12 +36,12 @@ for our thinking regarding this at the time of release.
 Hash160. This allows users to write abstract miniscripts hashes as "sha256(H)" instead of specifying the entire hash in the string.
 that updates the psbt with descriptor bip32 paths.
 - Re-name [`as_public`](https://github.com/rust-bitcoin/rust-miniscript/pull/377) APIs -> `to_public`
-- Significantly improve the [timelock](https://github.com/rust-bitcoin/rust-miniscript/pull/414) code with new rust-bitcoin APIs.
+- Significantly improve the [timelock](https://github.com/rust-bitcoin/rust-miniscript/pull/414) code with new rust-groestlcoin APIs.
 - rust-miniscript minor implementation detail: `PkH` fragment now has `Pk` generic instead of `Pk::Hash`. This only concerns users
-that operate with `MiniscriptKey = bitcoin::PublicKey` or users that use custom implementation of `MiniscriptKey`. Users that use
+that operate with `MiniscriptKey = groestlcoin::PublicKey` or users that use custom implementation of `MiniscriptKey`. Users that use
 `DescriptorPublicKey` need not be concerned. See [PR](https://github.com/rust-bitcoin/rust-miniscript/pull/431) for details.
-  - To elaborate, "pkh(<20-byte-hex>)" is no longer parsed by the `MiniscriptKey = bitcoin::PublicKey`.
-This is consistent with the descriptor spec as defined. Parsing from `bitcoin::Script` for pkh<20-byte-hex> is still supported, but the library would not analyze them. These raw descriptors are still in spec discussions. Rust-miniscript will support them once they are completely specified.
+  - To elaborate, "pkh(<20-byte-hex>)" is no longer parsed by the `MiniscriptKey = groestlcoin::PublicKey`.
+This is consistent with the descriptor spec as defined. Parsing from `groestlcoin::Script` for pkh<20-byte-hex> is still supported, but the library would not analyze them. These raw descriptors are still in spec discussions. Rust-miniscript will support them once they are completely specified.
 
 # 7.0.0 - April 20, 2022
 
@@ -62,7 +62,7 @@ See this (link)[https://github.com/rust-bitcoin/rust-miniscript/pull/349/commits
 - Overhaul the interpreter API to provide simpler APIs `iter(prevouts)` and `iter_assume_sig()`
   so that it no longer takes a closure input.
 - Add interpreter support for taproot transactions.
-- Works with rust-bitcoin 0.28.0
+- Works with rust-groestlcoin 0.28.0
 # 6.0.1 - Aug 5, 2021
 
 - The `lift` method on a Miniscript node was fixed. It would previously mix up

@@ -3,10 +3,10 @@
 
 //! Interpreter stack
 
-use bitcoin;
-use bitcoin::blockdata::{opcodes, script};
-use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
-use bitcoin::{LockTime, Sequence};
+use groestlcoin;
+use groestlcoin::blockdata::{opcodes, script};
+use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use groestlcoin::{LockTime, Sequence};
 
 use super::error::PkEvalErrInner;
 use super::{verify_sersig, BitcoinKey, Error, HashLockType, KeySigPair, SatisfiedConstraint};
@@ -49,11 +49,11 @@ impl<'txin> From<&'txin [u8]> for Element<'txin> {
 }
 
 impl<'txin> Element<'txin> {
-    /// Converts a Bitcoin `script::Instruction` to a stack element
+    /// Converts a Groestlcoin `script::Instruction` to a stack element
     ///
     /// Supports `OP_1` but no other numbers since these are not used by Miniscript
     pub fn from_instruction(
-        ins: Result<script::Instruction<'txin>, bitcoin::blockdata::script::Error>,
+        ins: Result<script::Instruction<'txin>, groestlcoin::blockdata::script::Error>,
     ) -> Result<Self, Error> {
         match ins {
             //Also covers the dissatisfied case as PushBytes0
@@ -162,15 +162,15 @@ impl<'txin> Stack<'txin> {
         pkh: hash160::Hash,
         sig_type: SigType,
     ) -> Option<Result<SatisfiedConstraint, Error>> {
-        // Parse a bitcoin key from witness data slice depending on hash context
+        // Parse a groestlcoin key from witness data slice depending on hash context
         // when we encounter a pkh(hash)
         // Depending on the tag of hash, we parse the as full key or x-only-key
         // TODO: All keys parse errors are currently captured in a single BadPubErr
         // We don't really store information about which key error.
         fn bitcoin_key_from_slice(sl: &[u8], sig_type: SigType) -> Option<BitcoinKey> {
             let key: BitcoinKey = match sig_type {
-                SigType::Schnorr => bitcoin::XOnlyPublicKey::from_slice(sl).ok()?.into(),
-                SigType::Ecdsa => bitcoin::PublicKey::from_slice(sl).ok()?.into(),
+                SigType::Schnorr => groestlcoin::XOnlyPublicKey::from_slice(sl).ok()?.into(),
+                SigType::Ecdsa => groestlcoin::PublicKey::from_slice(sl).ok()?.into(),
             };
             Some(key)
         }

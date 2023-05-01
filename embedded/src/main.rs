@@ -36,18 +36,18 @@ fn main() -> ! {
     )))";
     hprintln!("descriptor {}", descriptor).unwrap();
     let desc =
-        miniscript::Descriptor::<miniscript::bitcoin::PublicKey>::from_str(descriptor).unwrap();
+        miniscript::Descriptor::<miniscript::groestlcoin::PublicKey>::from_str(descriptor).unwrap();
 
     // Derive the P2SH address
     let p2sh_addr = desc
-        .address(miniscript::bitcoin::Network::Bitcoin)
+        .address(miniscript::groestlcoin::Network::Groestlcoin)
         .unwrap()
         .to_string();
     hprintln!("p2sh address {}", p2sh_addr).unwrap();
-    assert_eq!(p2sh_addr, "3CJxbQBfWAe1ZkKiGQNEYrioV73ZwvBWns");
+    assert_eq!(p2sh_addr, "3CJxbQBfWAe1ZkKiGQNEYrioV73ZvMViuT");
 
     // Check whether the descriptor is safe
-    // This checks whether all spend paths are accessible in bitcoin network.
+    // This checks whether all spend paths are accessible in groestlcoin network.
     // It maybe possible that some of the spend require more than 100 elements in Wsh scripts
     // Or they contain a combination of timelock and heightlock.
     assert!(desc.sanity_check().is_ok());

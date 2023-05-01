@@ -6,7 +6,7 @@
 use core::cmp;
 use core::iter::once;
 
-use bitcoin::{LockTime, PackedLockTime, Sequence};
+use groestlcoin::{LockTime, PackedLockTime, Sequence};
 
 use super::{Error, ErrorKind, Property, ScriptContext};
 use crate::miniscript::context::SigType;
@@ -931,7 +931,7 @@ impl Property for ExtData {
                 }
             }
             Terminal::After(t) => {
-                // Note that for CLTV this is a limitation not of Bitcoin but Miniscript. The
+                // Note that for CLTV this is a limitation not of Groestlcoin but Miniscript. The
                 // number on the stack would be a 5 bytes signed integer but Miniscript's B type
                 // only consumes 4 bytes from the stack.
                 if t == PackedLockTime::ZERO {

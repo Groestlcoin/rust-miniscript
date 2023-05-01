@@ -19,4 +19,4 @@ fuzz/hfuzz_workspace
 .vscode
 
 #Intergration test files
-integration_test/bitcoin-*
+integration_test/groestlcoin-*

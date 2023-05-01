@@ -5,10 +5,10 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::error;
 
-use bitcoin::hashes::hash160;
-use bitcoin::hashes::hex::ToHex;
-use bitcoin::util::taproot;
-use bitcoin::{self, secp256k1};
+use groestlcoin::hashes::hash160;
+use groestlcoin::hashes::hex::ToHex;
+use groestlcoin::util::taproot;
+use groestlcoin::{self, secp256k1};
 
 use super::BitcoinKey;
 use crate::prelude::*;
@@ -32,7 +32,7 @@ pub enum Error {
     /// General Interpreter error.
     CouldNotEvaluate,
     /// EcdsaSig related error
-    EcdsaSig(bitcoin::EcdsaSigError),
+    EcdsaSig(groestlcoin::EcdsaSigError),
     /// We expected a push (including a `OP_1` but no other numeric pushes)
     ExpectedPush,
     /// The preimage to the hash function must be exactly 32 bytes.
@@ -50,9 +50,9 @@ pub enum Error {
     /// Invalid Sighash type
     InvalidSchnorrSighashType(Vec<u8>),
     /// ecdsa Signature failed to verify
-    InvalidEcdsaSignature(bitcoin::PublicKey),
+    InvalidEcdsaSignature(groestlcoin::PublicKey),
     /// Signature failed to verify
-    InvalidSchnorrSignature(bitcoin::XOnlyPublicKey),
+    InvalidSchnorrSignature(groestlcoin::XOnlyPublicKey),
     /// Last byte of this signature isn't a standard sighash type
     NonStandardSighash(Vec<u8>),
     /// Miniscript error
@@ -90,9 +90,9 @@ pub enum Error {
     /// Miniscript requires the entire top level script to be satisfied.
     ScriptSatisfactionError,
     /// Schnorr Signature error
-    SchnorrSig(bitcoin::SchnorrSigError),
+    SchnorrSig(groestlcoin::SchnorrSigError),
     /// Errors in signature hash calculations
-    SighashError(bitcoin::util::sighash::Error),
+    SighashError(groestlcoin::util::sighash::Error),
     /// Taproot Annex Unsupported
     TapAnnexUnsupported,
     /// An uncompressed public key was encountered in a context where it is
@@ -243,22 +243,22 @@ impl From<secp256k1::Error> for Error {
 }
 
 #[doc(hidden)]
-impl From<bitcoin::util::sighash::Error> for Error {
-    fn from(e: bitcoin::util::sighash::Error) -> Error {
+impl From<groestlcoin::util::sighash::Error> for Error {
+    fn from(e: groestlcoin::util::sighash::Error) -> Error {
         Error::SighashError(e)
     }
 }
 
 #[doc(hidden)]
-impl From<bitcoin::EcdsaSigError> for Error {
-    fn from(e: bitcoin::EcdsaSigError) -> Error {
+impl From<groestlcoin::EcdsaSigError> for Error {
+    fn from(e: groestlcoin::EcdsaSigError) -> Error {
         Error::EcdsaSig(e)
     }
 }
 
 #[doc(hidden)]
-impl From<bitcoin::SchnorrSigError> for Error {
-    fn from(e: bitcoin::SchnorrSigError) -> Error {
+impl From<groestlcoin::SchnorrSigError> for Error {
+    fn from(e: groestlcoin::SchnorrSigError) -> Error {
         Error::SchnorrSig(e)
     }
 }
@@ -275,9 +275,9 @@ impl From<crate::Error> for Error {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum PkEvalErrInner {
     /// Full Key
-    FullKey(bitcoin::PublicKey),
+    FullKey(groestlcoin::PublicKey),
     /// XOnly Key
-    XOnlyKey(bitcoin::XOnlyPublicKey),
+    XOnlyKey(groestlcoin::XOnlyPublicKey),
 }
 
 impl From<BitcoinKey> for PkEvalErrInner {

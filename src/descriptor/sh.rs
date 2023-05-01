@@ -10,8 +10,8 @@
 
 use core::fmt;
 
-use bitcoin::blockdata::script;
-use bitcoin::{Address, Network, Script};
+use groestlcoin::blockdata::script;
+use groestlcoin::{Address, Network, Script};
 
 use super::checksum::{self, verify_checksum};
 use super::{SortedMultiVec, Wpkh, Wsh};

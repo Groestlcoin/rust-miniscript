@@ -7,15 +7,15 @@
 use std::collections::BTreeMap;
 use std::{error, fmt};
 
-use miniscript::bitcoin;
+use miniscript::groestlcoin;
 use actual_rand as rand;
-use bitcoin::blockdata::witness::Witness;
-use bitcoin::hashes::{sha256d, Hash};
-use bitcoin::util::psbt::PartiallySignedTransaction as Psbt;
-use bitcoin::util::sighash::SighashCache;
-use bitcoin::util::taproot::{LeafVersion, TapLeafHash};
-use bitcoin::util::{psbt, sighash};
-use bitcoin::{
+use groestlcoin::blockdata::witness::Witness;
+use groestlcoin::hashes::{sha256d, Hash};
+use groestlcoin::util::psbt::PartiallySignedTransaction as Psbt;
+use groestlcoin::util::sighash::SighashCache;
+use groestlcoin::util::taproot::{LeafVersion, TapLeafHash};
+use groestlcoin::util::{psbt, sighash};
+use groestlcoin::{
     secp256k1, Amount, LockTime, OutPoint, SchnorrSig, Script, Sequence, Transaction, TxIn,
     TxOut, Txid,
 };
@@ -90,7 +90,7 @@ pub fn test_desc_satisfy(
         .unwrap();
 
     let derived_desc = definite_desc.derived_descriptor(&secp).unwrap();
-    let desc_address = derived_desc.address(bitcoin::Network::Regtest);
+    let desc_address = derived_desc.address(groestlcoin::Network::Regtest);
     let desc_address = desc_address.map_err(|_x| DescError::AddressComputationError)?;
 
     // Next send some btc to each address corresponding to the miniscript
@@ -213,7 +213,7 @@ pub fn test_desc_satisfy(
                 let (x_only_pk, _parity) = secp256k1::XOnlyPublicKey::from_keypair(&keypair);
                 psbt.inputs[0].tap_script_sigs.insert(
                     (x_only_pk, leaf_hash),
-                    bitcoin::SchnorrSig {
+                    groestlcoin::SchnorrSig {
                         sig,
                         hash_ty: hash_ty,
                     },
@@ -259,7 +259,7 @@ pub fn test_desc_satisfy(
                 .to_secp_msg();
 
             // Fixme: Take a parameter
-            let hash_ty = bitcoin::EcdsaSighashType::All;
+            let hash_ty = groestlcoin::EcdsaSighashType::All;
 
             // Finally construct the signature and add to psbt
             for sk in sks_reqd {
@@ -268,7 +268,7 @@ pub fn test_desc_satisfy(
                 assert!(secp.verify_ecdsa(&msg, &sig, &pk.inner).is_ok());
                 psbt.inputs[0].partial_sigs.insert(
                     pk,
-                    bitcoin::EcdsaSig {
+                    groestlcoin::EcdsaSig {
                         sig,
                         hash_ty: hash_ty,
                     },
@@ -301,7 +301,7 @@ pub fn test_desc_satisfy(
     }
     let tx = psbt.extract(&secp).expect("Extraction error");
 
-    // Send the transactions to bitcoin node for mining.
+    // Send the transactions to groestlcoin node for mining.
     // Regtest mode has standardness checks
     // Check whether the node accepts the transactions
     let txid = cl
@@ -322,7 +322,7 @@ pub fn test_desc_satisfy(
 
 // Find all secret corresponding to the known public keys in ms
 fn find_sks_ms<Ctx: ScriptContext>(
-    ms: &Miniscript<bitcoin::PublicKey, Ctx>,
+    ms: &Miniscript<groestlcoin::PublicKey, Ctx>,
     testdata: &TestData,
 ) -> Vec<secp256k1::SecretKey> {
     let sks = &testdata.secretdata.sks;
@@ -337,7 +337,7 @@ fn find_sks_ms<Ctx: ScriptContext>(
     sks
 }
 
-fn find_sk_single_key(pk: bitcoin::PublicKey, testdata: &TestData) -> Vec<secp256k1::SecretKey> {
+fn find_sk_single_key(pk: groestlcoin::PublicKey, testdata: &TestData) -> Vec<secp256k1::SecretKey> {
     let sks = &testdata.secretdata.sks;
     let pks = &testdata.pubdata.pks;
     let i = pks.iter().position(|&x| x.to_public_key() == pk);

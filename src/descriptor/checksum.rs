@@ -2,7 +2,7 @@
 
 //! Descriptor checksum
 //!
-//! This module contains a re-implementation of the function used by Bitcoin Core to calculate the
+//! This module contains a re-implementation of the function used by Groestlcoin Core to calculate the
 //! checksum of a descriptor
 
 use core::fmt;

@@ -5,9 +5,9 @@ use core::{fmt, hash};
 #[cfg(feature = "std")]
 use std::error;
 
-use bitcoin;
-use bitcoin::blockdata::constants::MAX_BLOCK_WEIGHT;
-use bitcoin::hashes::{hash160, ripemd160, sha256};
+use groestlcoin;
+use groestlcoin::blockdata::constants::MAX_BLOCK_WEIGHT;
+use groestlcoin::hashes::{hash160, ripemd160, sha256};
 
 use super::decode::ParseableKey;
 use crate::miniscript::limits::{
@@ -54,7 +54,7 @@ pub enum ScriptContextError {
     /// The Miniscript (under p2sh context) corresponding Script would be
     /// larger than `MAX_SCRIPT_ELEMENT_SIZE` bytes.
     MaxRedeemScriptSizeExceeded,
-    /// The policy rules of bitcoin core only permit Script size upto 1650 bytes
+    /// The policy rules of groestlcoin core only permit Script size upto 1650 bytes
     MaxScriptSigSizeExceeded,
     /// Impossible to satisfy the miniscript under the current context
     ImpossibleSatisfaction,
@@ -214,9 +214,9 @@ where
     /// Depending on script Context, some of the Terminals might not
     /// be valid under the current consensus rules.
     /// Or some of the script resource limits may have been exceeded.
-    /// These miniscripts would never be accepted by the Bitcoin network and hence
+    /// These miniscripts would never be accepted by the Groestlcoin network and hence
     /// it is safe to discard them
-    /// For example, in Segwit Context with MiniscriptKey as bitcoin::PublicKey
+    /// For example, in Segwit Context with MiniscriptKey as groestlcoin::PublicKey
     /// uncompressed public keys are non-standard and thus invalid.
     /// In LegacyP2SH context, scripts above 520 bytes are invalid.
     /// Post Tapscript upgrade, this would have to consider other nodes.
@@ -228,10 +228,10 @@ where
     }
 
     /// Depending on script Context, some of the script resource limits
-    /// may have been exceeded under the current bitcoin core policy rules
-    /// These miniscripts would never be accepted by the Bitcoin network and hence
+    /// may have been exceeded under the current groestlcoin core policy rules
+    /// These miniscripts would never be accepted by the Groestlcoin network and hence
     /// it is safe to discard them. (unless explicitly disabled by non-standard flag)
-    /// For example, in Segwit Context with MiniscriptKey as bitcoin::PublicKey
+    /// For example, in Segwit Context with MiniscriptKey as groestlcoin::PublicKey
     /// scripts over 3600 bytes are invalid.
     /// Post Tapscript upgrade, this would have to consider other nodes.
     /// This does *NOT* recursively check the miniscript fragments.
@@ -343,7 +343,7 @@ pub enum SigType {
 pub enum Legacy {}
 
 impl ScriptContext for Legacy {
-    type Key = bitcoin::PublicKey;
+    type Key = groestlcoin::PublicKey;
     fn check_terminal_non_malleable<Pk: MiniscriptKey>(
         frag: &Terminal<Pk, Self>,
     ) -> Result<(), ScriptContextError> {
@@ -454,7 +454,7 @@ impl ScriptContext for Legacy {
 pub enum Segwitv0 {}
 
 impl ScriptContext for Segwitv0 {
-    type Key = bitcoin::PublicKey;
+    type Key = groestlcoin::PublicKey;
     fn check_terminal_non_malleable<Pk: MiniscriptKey>(
         _frag: &Terminal<Pk, Self>,
     ) -> Result<(), ScriptContextError> {
@@ -574,7 +574,7 @@ impl ScriptContext for Segwitv0 {
 pub enum Tap {}
 
 impl ScriptContext for Tap {
-    type Key = bitcoin::secp256k1::XOnlyPublicKey;
+    type Key = groestlcoin::secp256k1::XOnlyPublicKey;
     fn check_terminal_non_malleable<Pk: MiniscriptKey>(
         _frag: &Terminal<Pk, Self>,
     ) -> Result<(), ScriptContextError> {
@@ -683,7 +683,7 @@ impl ScriptContext for Tap {
 pub enum BareCtx {}
 
 impl ScriptContext for BareCtx {
-    type Key = bitcoin::PublicKey;
+    type Key = groestlcoin::PublicKey;
     fn check_terminal_non_malleable<Pk: MiniscriptKey>(
         _frag: &Terminal<Pk, Self>,
     ) -> Result<(), ScriptContextError> {
@@ -781,7 +781,7 @@ impl ScriptContext for BareCtx {
 pub enum NoChecks {}
 impl ScriptContext for NoChecks {
     // todo: When adding support for interpreter, we need a enum with all supported keys here
-    type Key = bitcoin::PublicKey;
+    type Key = groestlcoin::PublicKey;
     fn check_terminal_non_malleable<Pk: MiniscriptKey>(
         _frag: &Terminal<Pk, Self>,
     ) -> Result<(), ScriptContextError> {
