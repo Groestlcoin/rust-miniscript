@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 use groestlcoin::consensus::encode::deserialize;
 use groestlcoin::hashes::hex::FromHex;
 use groestlcoin::psbt::Psbt;
+=======
+use bitcoin::consensus::encode::deserialize;
+use bitcoin::hashes::hex::FromHex;
+use bitcoin::psbt::Psbt;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use miniscript::psbt::PsbtExt;
 
 fn main() {

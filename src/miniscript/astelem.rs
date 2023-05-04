@@ -11,8 +11,13 @@
 use core::fmt;
 use core::str::FromStr;
 
+<<<<<<< HEAD
 use groestlcoin::hashes::{hash160, Hash};
 use groestlcoin::{absolute, opcodes, script, Sequence};
+=======
+use bitcoin::hashes::{hash160, Hash};
+use bitcoin::{absolute, opcodes, script, Sequence};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use sync::Arc;
 
 use crate::miniscript::context::SigType;

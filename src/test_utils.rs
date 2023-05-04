@@ -5,9 +5,15 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
+<<<<<<< HEAD
 use groestlcoin::hashes::{hash160, ripemd160, sha256};
 use groestlcoin::key::XOnlyPublicKey;
 use groestlcoin::secp256k1;
+=======
+use bitcoin::hashes::{hash160, ripemd160, sha256};
+use bitcoin::key::XOnlyPublicKey;
+use bitcoin::secp256k1;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use crate::miniscript::context::SigType;
 use crate::{hash256, ToPublicKey, Translator};

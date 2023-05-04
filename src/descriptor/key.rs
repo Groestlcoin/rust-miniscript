@@ -6,12 +6,21 @@ use core::str::FromStr;
 #[cfg(feature = "std")]
 use std::error;
 
+<<<<<<< HEAD
 use groestlcoin::bip32;
 use groestlcoin::hash_types::XpubIdentifier;
 use groestlcoin::hashes::hex::FromHex;
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash, HashEngine};
 use groestlcoin::key::XOnlyPublicKey;
 use groestlcoin::secp256k1::{Secp256k1, Signing, Verification};
+=======
+use bitcoin::bip32;
+use bitcoin::hash_types::XpubIdentifier;
+use bitcoin::hashes::hex::FromHex;
+use bitcoin::hashes::{hash160, ripemd160, sha256, Hash, HashEngine};
+use bitcoin::key::XOnlyPublicKey;
+use bitcoin::secp256k1::{Secp256k1, Signing, Verification};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use crate::prelude::*;
 #[cfg(feature = "serde")]
@@ -905,7 +914,11 @@ impl<K: InnerXKey> DescriptorXKey<K> {
     /// ```
     /// # use std::str::FromStr;
     /// # fn body() -> Result<(), ()> {
+<<<<<<< HEAD
     /// use miniscript::groestlcoin::bip32;
+=======
+    /// use miniscript::bitcoin::bip32;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// use miniscript::descriptor::DescriptorPublicKey;
     ///
     /// let ctx = miniscript::groestlcoin::secp256k1::Secp256k1::signing_only();
@@ -1182,7 +1195,11 @@ impl Serialize for DescriptorPublicKey {
 mod test {
     use core::str::FromStr;
 
+<<<<<<< HEAD
     use groestlcoin::{bip32, secp256k1};
+=======
+    use bitcoin::{bip32, secp256k1};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     #[cfg(feature = "serde")]
     use serde_test::{assert_tokens, Token};
 

@@ -3,9 +3,15 @@
 
 //! Interpreter stack
 
+<<<<<<< HEAD
 use groestlcoin::blockdata::{opcodes, script};
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 use groestlcoin::{absolute, Sequence};
+=======
+use bitcoin::blockdata::{opcodes, script};
+use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use bitcoin::{absolute, Sequence};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::error::PkEvalErrInner;
 use super::{verify_sersig, BitcoinKey, Error, HashLockType, KeySigPair, SatisfiedConstraint};
@@ -168,8 +174,13 @@ impl<'txin> Stack<'txin> {
         // We don't really store information about which key error.
         fn bitcoin_key_from_slice(sl: &[u8], sig_type: SigType) -> Option<BitcoinKey> {
             let key: BitcoinKey = match sig_type {
+<<<<<<< HEAD
                 SigType::Schnorr => groestlcoin::key::XOnlyPublicKey::from_slice(sl).ok()?.into(),
                 SigType::Ecdsa => groestlcoin::PublicKey::from_slice(sl).ok()?.into(),
+=======
+                SigType::Schnorr => bitcoin::key::XOnlyPublicKey::from_slice(sl).ok()?.into(),
+                SigType::Ecdsa => bitcoin::PublicKey::from_slice(sl).ok()?.into(),
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             };
             Some(key)
         }

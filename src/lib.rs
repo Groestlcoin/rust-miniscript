@@ -134,9 +134,15 @@ use core::{cmp, fmt, hash, str};
 #[cfg(feature = "std")]
 use std::error;
 
+<<<<<<< HEAD
 use groestlcoin::blockdata::{opcodes, script};
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 use groestlcoin::locktime::absolute;
+=======
+use bitcoin::blockdata::{opcodes, script};
+use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
+use bitcoin::locktime::absolute;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 pub use crate::descriptor::{DefiniteDescriptorKey, Descriptor, DescriptorPublicKey};
 pub use crate::interpreter::Interpreter;
@@ -427,7 +433,11 @@ pub enum Error {
     /// rust-groestlcoin script error
     Script(script::Error),
     /// rust-bitcoin address error
+<<<<<<< HEAD
     AddrError(groestlcoin::address::Error),
+=======
+    AddrError(bitcoin::address::Error),
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// A `CHECKMULTISIG` opcode was preceded by a number > 20
     CmsTooManyKeys(u32),
     /// A tapscript multi_a cannot support more than MAX_BLOCK_WEIGHT/32 keys
@@ -455,7 +465,11 @@ pub enum Error {
     /// Parsed a miniscript but there were more script opcodes after it
     Trailing(String),
     /// Failed to parse a push as a public key
+<<<<<<< HEAD
     BadPubkey(groestlcoin::key::Error),
+=======
+    BadPubkey(bitcoin::key::Error),
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// Could not satisfy a script (fragment) because of a missing hash preimage
     MissingHash(sha256::Hash),
     /// Could not satisfy a script (fragment) because of a missing signature
@@ -678,8 +692,13 @@ impl From<groestlcoin::secp256k1::Error> for Error {
 }
 
 #[doc(hidden)]
+<<<<<<< HEAD
 impl From<groestlcoin::address::Error> for Error {
     fn from(e: groestlcoin::address::Error) -> Error {
+=======
+impl From<bitcoin::address::Error> for Error {
+    fn from(e: bitcoin::address::Error) -> Error {
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         Error::AddrError(e)
     }
 }
@@ -734,9 +753,15 @@ fn push_opcode_size(script_size: usize) -> usize {
 
 /// Helper function used by tests
 #[cfg(test)]
+<<<<<<< HEAD
 fn hex_script(s: &str) -> groestlcoin::ScriptBuf {
     let v: Vec<u8> = groestlcoin::hashes::hex::FromHex::from_hex(s).unwrap();
     groestlcoin::ScriptBuf::from(v)
+=======
+fn hex_script(s: &str) -> bitcoin::ScriptBuf {
+    let v: Vec<u8> = bitcoin::hashes::hex::FromHex::from_hex(s).unwrap();
+    bitcoin::ScriptBuf::from(v)
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 }
 
 /// An absolute locktime that implements `Ord`.

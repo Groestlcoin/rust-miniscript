@@ -13,7 +13,11 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::error;
 
+<<<<<<< HEAD
 use groestlcoin::{absolute, Sequence};
+=======
+use bitcoin::{absolute, Sequence};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 pub use self::correctness::{Base, Correctness, Input};
 pub use self::extra_props::ExtData;

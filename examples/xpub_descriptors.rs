@@ -70,9 +70,15 @@ fn p2sh_p2wsh<C: Verification>(secp: &Secp256k1<C>) -> Address {
         .address(Network::Groestlcoin)
         .unwrap();
 
+<<<<<<< HEAD
     let expected = Address::from_str("325zcVBN5o2eqqqtGwPjmtDd8dJRxDf35A")
         .unwrap()
         .require_network(Network::Groestlcoin)
+=======
+    let expected = Address::from_str("325zcVBN5o2eqqqtGwPjmtDd8dJRyYP82s")
+        .unwrap()
+        .require_network(Network::Bitcoin)
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         .unwrap();
     assert_eq!(address, expected);
     address

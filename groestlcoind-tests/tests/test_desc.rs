@@ -8,12 +8,21 @@ use std::collections::BTreeMap;
 use std::{error, fmt};
 
 use actual_rand as rand;
+<<<<<<< HEAD:groestlcoind-tests/tests/test_desc.rs
 use groestlcoin::blockdata::witness::Witness;
 use groestlcoin::hashes::{sha256d, Hash};
 use groestlcoin::psbt::Psbt;
 use groestlcoin::sighash::SighashCache;
 use groestlcoin::taproot::{LeafVersion, TapLeafHash};
 use groestlcoin::{
+=======
+use bitcoin::blockdata::witness::Witness;
+use bitcoin::hashes::{sha256d, Hash};
+use bitcoin::psbt::Psbt;
+use bitcoin::sighash::SighashCache;
+use bitcoin::taproot::{LeafVersion, TapLeafHash};
+use bitcoin::{
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/test_desc.rs
     absolute, psbt, secp256k1, sighash, Amount, OutPoint, Sequence, Transaction, TxIn, TxOut, Txid,
 };
 use bitcoind::bitcoincore_rpc::{json, Client, RpcApi};

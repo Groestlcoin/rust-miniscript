@@ -1,10 +1,17 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
+<<<<<<< HEAD
 use groestlcoin::address::WitnessVersion;
 use groestlcoin::key::XOnlyPublicKey;
 use groestlcoin::secp256k1::{rand, KeyPair};
 use groestlcoin::Network;
+=======
+use bitcoin::address::WitnessVersion;
+use bitcoin::key::XOnlyPublicKey;
+use bitcoin::secp256k1::{rand, KeyPair};
+use bitcoin::Network;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use miniscript::descriptor::DescriptorType;
 use miniscript::policy::Concrete;
 use miniscript::{translate_hash_fail, Descriptor, Miniscript, Tap, TranslatePk, Translator};

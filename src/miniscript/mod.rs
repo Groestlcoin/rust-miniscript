@@ -16,8 +16,13 @@
 use core::marker::PhantomData;
 use core::{fmt, hash, str};
 
+<<<<<<< HEAD
 use groestlcoin::script;
 use groestlcoin::taproot::{LeafVersion, TapLeafHash};
+=======
+use bitcoin::script;
+use bitcoin::taproot::{LeafVersion, TapLeafHash};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use self::analyzable::ExtParams;
 pub use self::context::{BareCtx, Legacy, Segwitv0, Tap};
@@ -193,17 +198,29 @@ impl<Ctx: ScriptContext> Miniscript<Ctx::Key, Ctx> {
     /// type TapScript = Miniscript<XOnlyPublicKey, Tap>;
     ///
     /// // parse x-only miniscript in Taproot context
+<<<<<<< HEAD
     /// let tapscript_ms = TapScript::parse(&groestlcoin::ScriptBuf::from_hex(
+=======
+    /// let tapscript_ms = TapScript::parse(&bitcoin::ScriptBuf::from_hex(
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     ///     "202788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99ac",
     /// ).expect("Even length hex"))
     ///     .expect("Xonly keys are valid only in taproot context");
     /// // tapscript fails decoding when we use them with compressed keys
+<<<<<<< HEAD
     /// let err = TapScript::parse(&groestlcoin::ScriptBuf::from_hex(
+=======
+    /// let err = TapScript::parse(&bitcoin::ScriptBuf::from_hex(
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     ///     "21022788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99ac",
     /// ).expect("Even length hex"))
     ///     .expect_err("Compressed keys cannot be used in Taproot context");
     /// // Segwitv0 succeeds decoding with full keys.
+<<<<<<< HEAD
     /// Segwitv0Script::parse(&groestlcoin::ScriptBuf::from_hex(
+=======
+    /// Segwitv0Script::parse(&bitcoin::ScriptBuf::from_hex(
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     ///     "21022788ee41e76f4f3af603da5bc8fa22997bc0344bb0f95666ba6aaff0242baa99ac",
     /// ).expect("Even length hex"))
     ///     .expect("Compressed keys are allowed in Segwit context");
@@ -476,10 +493,17 @@ mod tests {
     use core::str;
     use core::str::FromStr;
 
+<<<<<<< HEAD
     use groestlcoin::hashes::{hash160, sha256, Hash};
     use groestlcoin::secp256k1::XOnlyPublicKey;
     use groestlcoin::taproot::TapLeafHash;
     use groestlcoin::{self, secp256k1, Sequence};
+=======
+    use bitcoin::hashes::{hash160, sha256, Hash};
+    use bitcoin::secp256k1::XOnlyPublicKey;
+    use bitcoin::taproot::TapLeafHash;
+    use bitcoin::{self, secp256k1, Sequence};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     use sync::Arc;
 
     use super::{Miniscript, ScriptContext, Segwitv0, Tap};
@@ -1088,10 +1112,17 @@ mod tests {
                 &self,
                 _pk: &Pk,
                 _h: &TapLeafHash,
+<<<<<<< HEAD
             ) -> Option<groestlcoin::taproot::Signature> {
                 Some(groestlcoin::taproot::Signature {
                     sig: self.0,
                     hash_ty: groestlcoin::sighash::TapSighashType::Default,
+=======
+            ) -> Option<bitcoin::taproot::Signature> {
+                Some(bitcoin::taproot::Signature {
+                    sig: self.0,
+                    hash_ty: bitcoin::sighash::TapSighashType::Default,
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 })
             }
         }

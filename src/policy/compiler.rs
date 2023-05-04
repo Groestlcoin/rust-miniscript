@@ -1391,6 +1391,7 @@ mod tests {
         assert_eq!(abs.n_keys(), 5);
         assert_eq!(abs.minimum_n_keys(), Some(3));
 
+<<<<<<< HEAD
         let bitcoinsig = groestlcoin::ecdsa::Signature {
             sig,
             hash_ty: groestlcoin::sighash::EcdsaSighashType::All,
@@ -1401,6 +1402,18 @@ mod tests {
         let mut left_sat = HashMap::<groestlcoin::PublicKey, groestlcoin::ecdsa::Signature>::new();
         let mut right_sat =
             HashMap::<hashes::hash160::Hash, (groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)>::new(
+=======
+        let bitcoinsig = bitcoin::ecdsa::Signature {
+            sig,
+            hash_ty: bitcoin::sighash::EcdsaSighashType::All,
+        };
+        let sigvec = bitcoinsig.to_vec();
+
+        let no_sat = HashMap::<bitcoin::PublicKey, bitcoin::ecdsa::Signature>::new();
+        let mut left_sat = HashMap::<bitcoin::PublicKey, bitcoin::ecdsa::Signature>::new();
+        let mut right_sat =
+            HashMap::<hashes::hash160::Hash, (bitcoin::PublicKey, bitcoin::ecdsa::Signature)>::new(
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             );
 
         for i in 0..5 {

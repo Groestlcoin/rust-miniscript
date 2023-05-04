@@ -10,7 +10,11 @@ use core::fmt;
 use core::marker::PhantomData;
 use core::str::FromStr;
 
+<<<<<<< HEAD
 use groestlcoin::script;
+=======
+use bitcoin::script;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use crate::miniscript::context::ScriptContext;
 use crate::miniscript::decode::Terminal;

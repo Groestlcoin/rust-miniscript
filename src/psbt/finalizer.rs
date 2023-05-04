@@ -8,11 +8,19 @@
 //! `https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki`
 //!
 
+<<<<<<< HEAD
 use groestlcoin::key::XOnlyPublicKey;
 use groestlcoin::secp256k1::{self, Secp256k1};
 use groestlcoin::sighash::Prevouts;
 use groestlcoin::taproot::LeafVersion;
 use groestlcoin::{PublicKey, Script, ScriptBuf, TxOut, Witness};
+=======
+use bitcoin::key::XOnlyPublicKey;
+use bitcoin::secp256k1::{self, Secp256k1};
+use bitcoin::sighash::Prevouts;
+use bitcoin::taproot::LeafVersion;
+use bitcoin::{PublicKey, Script, ScriptBuf, TxOut, Witness};
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::{sanity_check, Error, InputError, Psbt, PsbtInputSatisfier};
 use crate::prelude::*;
@@ -246,7 +254,11 @@ fn get_descriptor(psbt: &Psbt, index: usize) -> Result<Descriptor<PublicKey>, In
         if inp.redeem_script.is_some() {
             return Err(InputError::NonEmptyRedeemScript);
         }
+<<<<<<< HEAD
         let ms = Miniscript::<groestlcoin::PublicKey, BareCtx>::parse_with_ext(
+=======
+        let ms = Miniscript::<bitcoin::PublicKey, BareCtx>::parse_with_ext(
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             &script_pubkey,
             &ExtParams::allow_all(),
         )?;
@@ -380,7 +392,11 @@ fn finalize_input_helper<C: secp256k1::Verification>(
         }
     };
 
+<<<<<<< HEAD
     let witness = groestlcoin::Witness::from_slice(&witness);
+=======
+    let witness = bitcoin::Witness::from_slice(&witness);
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     let utxos = prevouts(psbt)?;
     let utxos = &Prevouts::All(&utxos);
     interpreter_inp_check(psbt, secp, index, utxos, &witness, &script_sig)?;
@@ -437,7 +453,11 @@ pub(super) fn finalize_input<C: secp256k1::Verification>(
 
 #[cfg(test)]
 mod tests {
+<<<<<<< HEAD
     use groestlcoin::hashes::hex::FromHex;
+=======
+    use bitcoin::hashes::hex::FromHex;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
     use super::*;
     use crate::psbt::PsbtExt;

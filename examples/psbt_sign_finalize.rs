@@ -2,12 +2,21 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use actual_base64 as base64;
+<<<<<<< HEAD
 use groestlcoin::sighash::SighashCache;
 use groestlcoin::PrivateKey;
 use miniscript::groestlcoin::consensus::encode::deserialize;
 use miniscript::groestlcoin::hashes::hex::FromHex;
 use miniscript::groestlcoin::psbt::PartiallySignedTransaction as Psbt;
 use miniscript::groestlcoin::{
+=======
+use bitcoin::sighash::SighashCache;
+use bitcoin::PrivateKey;
+use miniscript::bitcoin::consensus::encode::deserialize;
+use miniscript::bitcoin::hashes::hex::FromHex;
+use miniscript::bitcoin::psbt::PartiallySignedTransaction as Psbt;
+use miniscript::bitcoin::{
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     self, psbt, secp256k1, Address, Network, OutPoint, Script, Sequence, Transaction, TxIn, TxOut,
 };
 use miniscript::psbt::{PsbtExt, PsbtInputExt};
@@ -89,7 +98,11 @@ fn main() {
     let hex_tx = "020000000001018ff27041f3d738f5f84fd5ee62f1c5b36afebfb15f6da0c9d1382ddd0eaaa23c0000000000feffffff02b3884703010000001600142ca3b4e53f17991582d47b15a053b3201891df5200e1f50500000000220020c0ebf552acd2a6f5dee4e067daaef17b3521e283aeaa44a475278617e3d2238a0247304402207b820860a9d425833f729775880b0ed59dd12b64b9a3d1ab677e27e4d6b370700220576003163f8420fe0b9dc8df726cff22cbc191104a2d4ae4f9dfedb087fcec72012103817e1da42a7701df4db94db8576f0e3605f3ab3701608b7e56f92321e4d8999100000000";
     let depo_tx: Transaction = deserialize(&Vec::<u8>::from_hex(hex_tx).unwrap()).unwrap();
 
+<<<<<<< HEAD
     let receiver = Address::from_str("grsrt1qsdks5za4t6sevaph6tz9ddfjzvhkdkxerp9276")
+=======
+    let receiver = Address::from_str("bcrt1qsdks5za4t6sevaph6tz9ddfjzvhkdkxe9tfrcy")
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         .unwrap()
         .assume_checked();
 
@@ -132,7 +145,11 @@ fn main() {
         .to_secp_msg();
 
     // Fixme: Take a parameter
+<<<<<<< HEAD
     let hash_ty = groestlcoin::sighash::EcdsaSighashType::All;
+=======
+    let hash_ty = bitcoin::sighash::EcdsaSighashType::All;
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
     let sk1 = backup1_private.inner;
     let sk2 = backup2_private.inner;
@@ -149,7 +166,11 @@ fn main() {
 
     psbt.inputs[0].partial_sigs.insert(
         pk1,
+<<<<<<< HEAD
         groestlcoin::ecdsa::Signature {
+=======
+        bitcoin::ecdsa::Signature {
+>>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             sig: sig1,
             hash_ty: hash_ty,
         },
