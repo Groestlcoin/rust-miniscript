@@ -271,10 +271,7 @@ impl_from_str!(
 );
 
 impl<Pk: MiniscriptKey> ForEachKey<Pk> for Wsh<Pk> {
-    fn for_each_key<'a, F: FnMut(&'a Pk) -> bool>(&'a self, pred: F) -> bool
-    where
-        Pk: 'a,
-    {
+    fn for_each_key<'a, F: FnMut(&'a Pk) -> bool>(&'a self, pred: F) -> bool {
         match self.inner {
             WshInner::SortedMulti(ref smv) => smv.for_each_key(pred),
             WshInner::Ms(ref ms) => ms.for_each_key(pred),
@@ -482,10 +479,7 @@ impl_from_str!(
 );
 
 impl<Pk: MiniscriptKey> ForEachKey<Pk> for Wpkh<Pk> {
-    fn for_each_key<'a, F: FnMut(&'a Pk) -> bool>(&'a self, mut pred: F) -> bool
-    where
-        Pk: 'a,
-    {
+    fn for_each_key<'a, F: FnMut(&'a Pk) -> bool>(&'a self, mut pred: F) -> bool {
         pred(&self.pk)
     }
 }
