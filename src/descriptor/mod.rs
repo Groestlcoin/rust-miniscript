@@ -2148,4 +2148,54 @@ pk(03f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8))";
         Desc::from_str(&format!("tr({},pk({}))", x_only_key, uncomp_key)).unwrap_err();
         Desc::from_str(&format!("tr({},pk({}))", x_only_key, x_only_key)).unwrap();
     }
+
+    #[test]
+    fn test_context_pks() {
+        let comp_key = bitcoin::PublicKey::from_str(
+            "02015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab",
+        )
+        .unwrap();
+        let x_only_key = bitcoin::key::XOnlyPublicKey::from_str(
+            "015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab",
+        )
+        .unwrap();
+        let uncomp_key = bitcoin::PublicKey::from_str("04015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab0d46021e9e69ef061eb25eab41ae206187b2b05e829559df59d78319bd9267b4").unwrap();
+
+        type Desc = Descriptor<DescriptorPublicKey>;
+
+        // Legacy tests, x-only keys are not supported
+        Desc::from_str(&format!("sh(pk({}))", comp_key)).unwrap();
+        Desc::from_str(&format!("sh(pk({}))", uncomp_key)).unwrap();
+        Desc::from_str(&format!("sh(pk({}))", x_only_key)).unwrap_err();
+
+        // bare tests, x-only keys not supported
+        Desc::from_str(&format!("pk({})", comp_key)).unwrap();
+        Desc::from_str(&format!("pk({})", uncomp_key)).unwrap();
+        Desc::from_str(&format!("pk({})", x_only_key)).unwrap_err();
+
+        // pkh tests, x-only keys not supported
+        Desc::from_str(&format!("pkh({})", comp_key)).unwrap();
+        Desc::from_str(&format!("pkh({})", uncomp_key)).unwrap();
+        Desc::from_str(&format!("pkh({})", x_only_key)).unwrap_err();
+
+        // wpkh tests, uncompressed and x-only keys not supported
+        Desc::from_str(&format!("wpkh({})", comp_key)).unwrap();
+        Desc::from_str(&format!("wpkh({})", uncomp_key)).unwrap_err();
+        Desc::from_str(&format!("wpkh({})", x_only_key)).unwrap_err();
+
+        // Segwitv0 tests, uncompressed and x-only keys not supported
+        Desc::from_str(&format!("wsh(pk({}))", comp_key)).unwrap();
+        Desc::from_str(&format!("wsh(pk({}))", uncomp_key)).unwrap_err();
+        Desc::from_str(&format!("wsh(pk({}))", x_only_key)).unwrap_err();
+
+        // Tap tests, key path
+        Desc::from_str(&format!("tr({})", comp_key)).unwrap();
+        Desc::from_str(&format!("tr({})", uncomp_key)).unwrap_err();
+        Desc::from_str(&format!("tr({})", x_only_key)).unwrap();
+
+        // Tap tests, script path
+        Desc::from_str(&format!("tr({},pk({}))", x_only_key, comp_key)).unwrap();
+        Desc::from_str(&format!("tr({},pk({}))", x_only_key, uncomp_key)).unwrap_err();
+        Desc::from_str(&format!("tr({},pk({}))", x_only_key, x_only_key)).unwrap();
+    }
 }
