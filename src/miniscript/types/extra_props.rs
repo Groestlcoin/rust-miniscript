@@ -6,11 +6,7 @@
 use core::cmp;
 use core::iter::once;
 
-<<<<<<< HEAD
 use groestlcoin::{absolute, Sequence};
-=======
-use bitcoin::{absolute, Sequence};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::{Error, ErrorKind, Property, ScriptContext};
 use crate::miniscript::context::SigType;

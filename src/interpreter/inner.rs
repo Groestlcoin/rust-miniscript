@@ -1,15 +1,9 @@
 // Written in 2019 by Sanket Kanjular and Andrew Poelstra
 // SPDX-License-Identifier: CC0-1.0
 
-<<<<<<< HEAD
 use groestlcoin::hashes::{hash160, sha256, Hash};
 use groestlcoin::taproot::{ControlBlock, TAPROOT_ANNEX_PREFIX};
 use groestlcoin::Witness;
-=======
-use bitcoin::hashes::{hash160, sha256, Hash};
-use bitcoin::taproot::{ControlBlock, TAPROOT_ANNEX_PREFIX};
-use bitcoin::Witness;
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::{stack, BitcoinKey, Error, Stack};
 use crate::miniscript::context::{NoChecks, ScriptContext, SigType};
@@ -49,11 +43,7 @@ fn script_from_stack_elem<Ctx: ScriptContext>(
 ) -> Result<Miniscript<Ctx::Key, Ctx>, Error> {
     match *elem {
         stack::Element::Push(sl) => {
-<<<<<<< HEAD
             Miniscript::parse_with_ext(&groestlcoin::Script::from_bytes(sl), &ExtParams::allow_all())
-=======
-            Miniscript::parse_with_ext(&bitcoin::Script::from_bytes(sl), &ExtParams::allow_all())
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 .map_err(Error::from)
         }
         stack::Element::Satisfied => {
@@ -109,11 +99,7 @@ pub(super) fn from_txdata<'txin>(
     spk: &groestlcoin::Script,
     script_sig: &'txin groestlcoin::Script,
     witness: &'txin Witness,
-<<<<<<< HEAD
 ) -> Result<(Inner, Stack<'txin>, Option<groestlcoin::ScriptBuf>), Error> {
-=======
-) -> Result<(Inner, Stack<'txin>, Option<bitcoin::ScriptBuf>), Error> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     let mut ssig_stack: Stack = script_sig
         .instructions_minimal()
         .map(stack::Element::from_instruction)
@@ -148,11 +134,7 @@ pub(super) fn from_txdata<'txin>(
                 Some(elem) => {
                     let pk = pk_from_stack_elem(&elem, false)?;
                     if *spk
-<<<<<<< HEAD
                         == groestlcoin::ScriptBuf::new_p2pkh(&pk.to_pubkeyhash(SigType::Ecdsa).into())
-=======
-                        == bitcoin::ScriptBuf::new_p2pkh(&pk.to_pubkeyhash(SigType::Ecdsa).into())
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                     {
                         Ok((
                             Inner::PublicKey(pk.into(), PubkeyType::Pkh),
@@ -175,19 +157,11 @@ pub(super) fn from_txdata<'txin>(
                 Some(elem) => {
                     let pk = pk_from_stack_elem(&elem, true)?;
                     let hash160 = pk.to_pubkeyhash(SigType::Ecdsa);
-<<<<<<< HEAD
                     if *spk == groestlcoin::ScriptBuf::new_v0_p2wpkh(&hash160.into()) {
                         Ok((
                             Inner::PublicKey(pk.into(), PubkeyType::Wpkh),
                             wit_stack,
                             Some(groestlcoin::ScriptBuf::new_p2pkh(&hash160.into())), // bip143, why..
-=======
-                    if *spk == bitcoin::ScriptBuf::new_v0_p2wpkh(&hash160.into()) {
-                        Ok((
-                            Inner::PublicKey(pk.into(), PubkeyType::Wpkh),
-                            wit_stack,
-                            Some(bitcoin::ScriptBuf::new_p2pkh(&hash160.into())), // bip143, why..
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                         ))
                     } else {
                         Err(Error::IncorrectWPubkeyHash)
@@ -207,11 +181,7 @@ pub(super) fn from_txdata<'txin>(
                     let script = miniscript.encode();
                     let miniscript = miniscript.to_no_checks_ms();
                     let scripthash = sha256::Hash::hash(script.as_bytes());
-<<<<<<< HEAD
                     if *spk == groestlcoin::ScriptBuf::new_v0_p2wsh(&scripthash.into()) {
-=======
-                    if *spk == bitcoin::ScriptBuf::new_v0_p2wsh(&scripthash.into()) {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                         Ok((
                             Inner::Script(miniscript, ScriptType::Wsh),
                             wit_stack,
@@ -229,11 +199,7 @@ pub(super) fn from_txdata<'txin>(
         if !ssig_stack.is_empty() {
             Err(Error::NonEmptyScriptSig)
         } else {
-<<<<<<< HEAD
             let output_key = groestlcoin::key::XOnlyPublicKey::from_slice(spk[2..].as_bytes())
-=======
-            let output_key = bitcoin::key::XOnlyPublicKey::from_slice(spk[2..].as_bytes())
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 .map_err(|_| Error::XOnlyPublicKeyParseError)?;
             let has_annex = wit_stack
                 .last()
@@ -290,11 +256,7 @@ pub(super) fn from_txdata<'txin>(
             Some(elem) => {
                 if let stack::Element::Push(slice) = elem {
                     let scripthash = hash160::Hash::hash(slice);
-<<<<<<< HEAD
                     if *spk != groestlcoin::ScriptBuf::new_p2sh(&scripthash.into()) {
-=======
-                    if *spk != bitcoin::ScriptBuf::new_p2sh(&scripthash.into()) {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                         return Err(Error::IncorrectScriptHash);
                     }
                     // ** p2sh-wrapped wpkh **
@@ -307,21 +269,13 @@ pub(super) fn from_txdata<'txin>(
                                     let pk = pk_from_stack_elem(&elem, true)?;
                                     let hash160 = pk.to_pubkeyhash(SigType::Ecdsa);
                                     if slice
-<<<<<<< HEAD
                                         == groestlcoin::ScriptBuf::new_v0_p2wpkh(&hash160.into())
-=======
-                                        == bitcoin::ScriptBuf::new_v0_p2wpkh(&hash160.into())
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                                             .as_bytes()
                                     {
                                         Ok((
                                             Inner::PublicKey(pk.into(), PubkeyType::ShWpkh),
                                             wit_stack,
-<<<<<<< HEAD
                                             Some(groestlcoin::ScriptBuf::new_p2pkh(&hash160.into())), // bip143, why..
-=======
-                                            Some(bitcoin::ScriptBuf::new_p2pkh(&hash160.into())), // bip143, why..
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                                         ))
                                     } else {
                                         Err(Error::IncorrectWScriptHash)
@@ -343,11 +297,7 @@ pub(super) fn from_txdata<'txin>(
                                     let miniscript = miniscript.to_no_checks_ms();
                                     let scripthash = sha256::Hash::hash(script.as_bytes());
                                     if slice
-<<<<<<< HEAD
                                         == groestlcoin::ScriptBuf::new_v0_p2wsh(&scripthash.into())
-=======
-                                        == bitcoin::ScriptBuf::new_v0_p2wsh(&scripthash.into())
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                                             .as_bytes()
                                     {
                                         Ok((
@@ -370,11 +320,7 @@ pub(super) fn from_txdata<'txin>(
                 let miniscript = miniscript.to_no_checks_ms();
                 if wit_stack.is_empty() {
                     let scripthash = hash160::Hash::hash(script.as_bytes());
-<<<<<<< HEAD
                     if *spk == groestlcoin::ScriptBuf::new_p2sh(&scripthash.into()) {
-=======
-                    if *spk == bitcoin::ScriptBuf::new_p2sh(&scripthash.into()) {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                         Ok((
                             Inner::Script(miniscript, ScriptType::Sh),
                             ssig_stack,
@@ -439,30 +385,17 @@ impl<Ctx: ScriptContext> ToNoChecks for Miniscript<groestlcoin::PublicKey, Ctx> 
     }
 }
 
-<<<<<<< HEAD
 impl<Ctx: ScriptContext> ToNoChecks for Miniscript<groestlcoin::key::XOnlyPublicKey, Ctx> {
-=======
-impl<Ctx: ScriptContext> ToNoChecks for Miniscript<bitcoin::key::XOnlyPublicKey, Ctx> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     fn to_no_checks_ms(&self) -> Miniscript<BitcoinKey, NoChecks> {
         // specify the () error type as this cannot error
         struct TranslateXOnlyPk;
 
-<<<<<<< HEAD
         impl Translator<groestlcoin::key::XOnlyPublicKey, BitcoinKey, ()> for TranslateXOnlyPk {
             fn pk(&mut self, pk: &groestlcoin::key::XOnlyPublicKey) -> Result<BitcoinKey, ()> {
                 Ok(BitcoinKey::XOnlyPublicKey(*pk))
             }
 
             translate_hash_clone!(groestlcoin::key::XOnlyPublicKey, BitcoinKey, ());
-=======
-        impl Translator<bitcoin::key::XOnlyPublicKey, BitcoinKey, ()> for TranslateXOnlyPk {
-            fn pk(&mut self, pk: &bitcoin::key::XOnlyPublicKey) -> Result<BitcoinKey, ()> {
-                Ok(BitcoinKey::XOnlyPublicKey(*pk))
-            }
-
-            translate_hash_clone!(bitcoin::key::XOnlyPublicKey, BitcoinKey, ());
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         }
         self.real_translate_pk(&mut TranslateXOnlyPk)
             .expect("Translation should succeed")
@@ -475,25 +408,16 @@ mod tests {
     use core::convert::TryFrom;
     use core::str::FromStr;
 
-<<<<<<< HEAD
     use groestlcoin::blockdata::script;
     use groestlcoin::hashes::hex::FromHex;
     use groestlcoin::hashes::{hash160, sha256, Hash};
     use groestlcoin::script::PushBytes;
     use groestlcoin::{self, ScriptBuf};
-=======
-    use bitcoin::blockdata::script;
-    use bitcoin::hashes::hex::FromHex;
-    use bitcoin::hashes::{hash160, sha256, Hash};
-    use bitcoin::script::PushBytes;
-    use bitcoin::{self, ScriptBuf};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
     use super::*;
     use crate::miniscript::analyzable::ExtParams;
 
     struct KeyTestData {
-<<<<<<< HEAD
         pk_spk: groestlcoin::ScriptBuf,
         pk_sig: groestlcoin::ScriptBuf,
         pkh_spk: groestlcoin::ScriptBuf,
@@ -504,18 +428,6 @@ mod tests {
         wpkh_stack_justkey: Witness,
         sh_wpkh_spk: groestlcoin::ScriptBuf,
         sh_wpkh_sig: groestlcoin::ScriptBuf,
-=======
-        pk_spk: bitcoin::ScriptBuf,
-        pk_sig: bitcoin::ScriptBuf,
-        pkh_spk: bitcoin::ScriptBuf,
-        pkh_sig: bitcoin::ScriptBuf,
-        pkh_sig_justkey: bitcoin::ScriptBuf,
-        wpkh_spk: bitcoin::ScriptBuf,
-        wpkh_stack: Witness,
-        wpkh_stack_justkey: Witness,
-        sh_wpkh_spk: bitcoin::ScriptBuf,
-        sh_wpkh_sig: bitcoin::ScriptBuf,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         sh_wpkh_stack: Witness,
         sh_wpkh_stack_justkey: Witness,
     }
@@ -535,21 +447,12 @@ mod tests {
 
             let pkhash = key.to_pubkeyhash(SigType::Ecdsa).into();
             let wpkhash = key.to_pubkeyhash(SigType::Ecdsa).into();
-<<<<<<< HEAD
             let wpkh_spk = groestlcoin::ScriptBuf::new_v0_p2wpkh(&wpkhash);
             let wpkh_scripthash = hash160::Hash::hash(wpkh_spk.as_bytes()).into();
 
             KeyTestData {
                 pk_spk: groestlcoin::ScriptBuf::new_p2pk(&key),
                 pkh_spk: groestlcoin::ScriptBuf::new_p2pkh(&pkhash),
-=======
-            let wpkh_spk = bitcoin::ScriptBuf::new_v0_p2wpkh(&wpkhash);
-            let wpkh_scripthash = hash160::Hash::hash(wpkh_spk.as_bytes()).into();
-
-            KeyTestData {
-                pk_spk: bitcoin::ScriptBuf::new_p2pk(&key),
-                pkh_spk: bitcoin::ScriptBuf::new_p2pkh(&pkhash),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 pk_sig: script::Builder::new().push_slice(&dummy_sig).into_script(),
                 pkh_sig: script::Builder::new()
                     .push_slice(&dummy_sig)
@@ -559,11 +462,7 @@ mod tests {
                 wpkh_spk: wpkh_spk.clone(),
                 wpkh_stack: Witness::from_slice(&vec![dummy_sig_vec.clone(), key.to_bytes()]),
                 wpkh_stack_justkey: Witness::from_slice(&vec![key.to_bytes()]),
-<<<<<<< HEAD
                 sh_wpkh_spk: groestlcoin::ScriptBuf::new_p2sh(&wpkh_scripthash),
-=======
-                sh_wpkh_spk: bitcoin::ScriptBuf::new_p2sh(&wpkh_scripthash),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 sh_wpkh_sig: script::Builder::new()
                     .push_slice(<&PushBytes>::try_from(wpkh_spk[..].as_bytes()).unwrap())
                     .into_script(),
@@ -601,11 +500,7 @@ mod tests {
         let fixed = fixed_test_data();
         let comp = KeyTestData::from_key(fixed.pk_comp);
         let uncomp = KeyTestData::from_key(fixed.pk_uncomp);
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         let empty_wit = Witness::default();
 
         // Compressed pk, empty scriptsig
@@ -654,25 +549,15 @@ mod tests {
         // Scriptpubkey has invalid key
         let mut spk = comp.pk_spk.to_bytes();
         spk[1] = 5;
-<<<<<<< HEAD
         let spk = groestlcoin::ScriptBuf::from(spk);
         let err = from_txdata(&spk, &groestlcoin::ScriptBuf::new(), &empty_wit).unwrap_err();
-=======
-        let spk = bitcoin::ScriptBuf::from(spk);
-        let err = from_txdata(&spk, &bitcoin::ScriptBuf::new(), &empty_wit).unwrap_err();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         assert_eq!(err.to_string(), "could not parse pubkey");
 
         // Scriptpubkey has invalid script
         let mut spk = comp.pk_spk.to_bytes();
         spk[0] = 100;
-<<<<<<< HEAD
         let spk = groestlcoin::ScriptBuf::from(spk);
         let err = from_txdata(&spk, &groestlcoin::ScriptBuf::new(), &empty_wit).unwrap_err();
-=======
-        let spk = bitcoin::ScriptBuf::from(spk);
-        let err = from_txdata(&spk, &bitcoin::ScriptBuf::new(), &empty_wit).unwrap_err();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         assert_eq!(&err.to_string()[0..12], "parse error:");
 
         // Witness is nonempty
@@ -689,11 +574,7 @@ mod tests {
         let empty_wit = Witness::default();
 
         // pkh, empty scriptsig; this time it errors out
-<<<<<<< HEAD
         let err = from_txdata(&comp.pkh_spk, &groestlcoin::ScriptBuf::new(), &empty_wit).unwrap_err();
-=======
-        let err = from_txdata(&comp.pkh_spk, &bitcoin::ScriptBuf::new(), &empty_wit).unwrap_err();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         assert_eq!(err.to_string(), "unexpected end of stack");
 
         // pkh, wrong pubkey
@@ -751,11 +632,7 @@ mod tests {
         let fixed = fixed_test_data();
         let comp = KeyTestData::from_key(fixed.pk_comp);
         let uncomp = KeyTestData::from_key(fixed.pk_uncomp);
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         // wpkh, empty witness; this time it errors out
         let err = from_txdata(&comp.wpkh_spk, &blank_script, &Witness::default()).unwrap_err();
@@ -811,11 +688,7 @@ mod tests {
         let fixed = fixed_test_data();
         let comp = KeyTestData::from_key(fixed.pk_comp);
         let uncomp = KeyTestData::from_key(fixed.pk_uncomp);
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         // sh_wpkh, missing witness or scriptsig
         let err = from_txdata(&comp.sh_wpkh_spk, &blank_script, &Witness::default()).unwrap_err();
@@ -885,13 +758,8 @@ mod tests {
         assert_eq!(script_code, Some(comp.pkh_spk.clone()));
     }
 
-<<<<<<< HEAD
     fn ms_inner_script(ms: &str) -> (Miniscript<BitcoinKey, NoChecks>, groestlcoin::ScriptBuf) {
         let ms = Miniscript::<groestlcoin::PublicKey, Segwitv0>::from_str_ext(ms, &ExtParams::insane())
-=======
-    fn ms_inner_script(ms: &str) -> (Miniscript<BitcoinKey, NoChecks>, bitcoin::ScriptBuf) {
-        let ms = Miniscript::<bitcoin::PublicKey, Segwitv0>::from_str_ext(ms, &ExtParams::insane())
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             .unwrap();
         let spk = ms.encode();
         let miniscript = ms.to_no_checks_ms();
@@ -902,11 +770,7 @@ mod tests {
     fn script_bare() {
         let preimage = b"12345678----____12345678----____";
         let hash = hash160::Hash::hash(&preimage[..]);
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         let empty_wit = Witness::default();
         let (miniscript, spk) = ms_inner_script(&format!("hash160({})", hash));
 
@@ -938,11 +802,7 @@ mod tests {
         let script_sig = script::Builder::new()
             .push_slice(<&PushBytes>::try_from(redeem_script.as_bytes()).unwrap())
             .into_script();
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         let empty_wit = Witness::default();
 
         // sh without scriptsig
@@ -975,11 +835,7 @@ mod tests {
         let wit_stack = Witness::from_slice(&vec![witness_script.to_bytes()]);
 
         let spk = ScriptBuf::new_v0_p2wsh(&wit_hash);
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         // wsh without witness
         let err = from_txdata(&spk, &blank_script, &Witness::default()).unwrap_err();
@@ -1017,11 +873,7 @@ mod tests {
         let script_sig = script::Builder::new()
             .push_slice(<&PushBytes>::try_from(redeem_script.as_bytes()).unwrap())
             .into_script();
-<<<<<<< HEAD
         let blank_script = groestlcoin::ScriptBuf::new();
-=======
-        let blank_script = bitcoin::ScriptBuf::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         let rs_hash = hash160::Hash::hash(redeem_script.as_bytes()).into();
         let spk = ScriptBuf::new_p2sh(&rs_hash);

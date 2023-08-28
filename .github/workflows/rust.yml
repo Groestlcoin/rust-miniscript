@@ -42,7 +42,7 @@ jobs:
           override: true
       - name: Running integration tests
         env:
-          DO_BITCOIND_TESTS: false
+          DO_GROESTLCOIND_TESTS: false
         run: ./contrib/test.sh
 
   Tests:

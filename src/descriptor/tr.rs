@@ -4,19 +4,11 @@ use core::cmp::{self, max};
 use core::str::FromStr;
 use core::{fmt, hash};
 
-<<<<<<< HEAD
 use groestlcoin::taproot::{
     LeafVersion, TaprootBuilder, TaprootSpendInfo, TAPROOT_CONTROL_BASE_SIZE,
     TAPROOT_CONTROL_MAX_NODE_COUNT, TAPROOT_CONTROL_NODE_SIZE,
 };
 use groestlcoin::{opcodes, secp256k1, Address, Network, ScriptBuf};
-=======
-use bitcoin::taproot::{
-    LeafVersion, TaprootBuilder, TaprootSpendInfo, TAPROOT_CONTROL_BASE_SIZE,
-    TAPROOT_CONTROL_MAX_NODE_COUNT, TAPROOT_CONTROL_NODE_SIZE,
-};
-use bitcoin::{opcodes, secp256k1, Address, Network, ScriptBuf};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use sync::Arc;
 
 use super::checksum::{self, verify_checksum};

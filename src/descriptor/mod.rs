@@ -16,15 +16,9 @@ use core::fmt;
 use core::ops::Range;
 use core::str::{self, FromStr};
 
-<<<<<<< HEAD
 use groestlcoin::address::WitnessVersion;
 use groestlcoin::hashes::{hash160, ripemd160, sha256};
 use groestlcoin::{secp256k1, Address, Network, Script, ScriptBuf, TxIn, Witness};
-=======
-use bitcoin::address::WitnessVersion;
-use bitcoin::hashes::{hash160, ripemd160, sha256};
-use bitcoin::{secp256k1, Address, Network, Script, ScriptBuf, TxIn, Witness};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use sync::Arc;
 
 use self::checksum::verify_checksum;
@@ -597,13 +591,8 @@ impl Descriptor<DescriptorPublicKey> {
         self.at_derivation_index(index)
     }
 
-<<<<<<< HEAD
     /// Convert all the public keys in the descriptor to [`groestlcoin::PublicKey`] by deriving them or
     /// otherwise converting them. All [`groestlcoin::secp256k1::XOnlyPublicKey`]s are converted to by adding a
-=======
-    /// Convert all the public keys in the descriptor to [`bitcoin::PublicKey`] by deriving them or
-    /// otherwise converting them. All [`bitcoin::secp256k1::XOnlyPublicKey`]s are converted to by adding a
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// default(0x02) y-coordinate.
     ///
     /// This is a shorthand for:
@@ -848,13 +837,8 @@ impl Descriptor<DescriptorPublicKey> {
 }
 
 impl Descriptor<DefiniteDescriptorKey> {
-<<<<<<< HEAD
     /// Convert all the public keys in the descriptor to [`groestlcoin::PublicKey`] by deriving them or
     /// otherwise converting them. All [`groestlcoin::secp256k1::XOnlyPublicKey`]s are converted to by adding a
-=======
-    /// Convert all the public keys in the descriptor to [`bitcoin::PublicKey`] by deriving them or
-    /// otherwise converting them. All [`bitcoin::secp256k1::XOnlyPublicKey`]s are converted to by adding a
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// default(0x02) y-coordinate.
     ///
     /// # Examples
@@ -974,7 +958,6 @@ mod tests {
     use core::convert::TryFrom;
     use core::str::FromStr;
 
-<<<<<<< HEAD
     use groestlcoin::blockdata::opcodes::all::{OP_CLTV, OP_CSV};
     use groestlcoin::blockdata::script::Instruction;
     use groestlcoin::blockdata::{opcodes, script};
@@ -983,16 +966,6 @@ mod tests {
     use groestlcoin::script::PushBytes;
     use groestlcoin::sighash::EcdsaSighashType;
     use groestlcoin::{self, bip32, secp256k1, PublicKey, Sequence};
-=======
-    use bitcoin::blockdata::opcodes::all::{OP_CLTV, OP_CSV};
-    use bitcoin::blockdata::script::Instruction;
-    use bitcoin::blockdata::{opcodes, script};
-    use bitcoin::hashes::hex::FromHex;
-    use bitcoin::hashes::{hash160, sha256, Hash};
-    use bitcoin::script::PushBytes;
-    use bitcoin::sighash::EcdsaSighashType;
-    use bitcoin::{self, bip32, secp256k1, PublicKey, Sequence};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
     use super::checksum::desc_checksum;
     use super::tr::Tr;
@@ -1256,7 +1229,6 @@ mod tests {
             pk: groestlcoin::PublicKey,
         }
 
-<<<<<<< HEAD
         impl Satisfier<groestlcoin::PublicKey> for SimpleSat {
             fn lookup_ecdsa_sig(
                 &self,
@@ -1266,17 +1238,6 @@ mod tests {
                     Some(groestlcoin::ecdsa::Signature {
                         sig: self.sig,
                         hash_ty: groestlcoin::sighash::EcdsaSighashType::All,
-=======
-        impl Satisfier<bitcoin::PublicKey> for SimpleSat {
-            fn lookup_ecdsa_sig(
-                &self,
-                pk: &bitcoin::PublicKey,
-            ) -> Option<bitcoin::ecdsa::Signature> {
-                if *pk == self.pk {
-                    Some(bitcoin::ecdsa::Signature {
-                        sig: self.sig,
-                        hash_ty: bitcoin::sighash::EcdsaSighashType::All,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                     })
                 } else {
                     None
@@ -1287,15 +1248,9 @@ mod tests {
         let satisfier = SimpleSat { sig, pk };
         let ms = ms_str!("c:pk_k({})", pk);
 
-<<<<<<< HEAD
         let mut txin = groestlcoin::TxIn {
             previous_output: groestlcoin::OutPoint::default(),
             script_sig: groestlcoin::ScriptBuf::new(),
-=======
-        let mut txin = bitcoin::TxIn {
-            previous_output: bitcoin::OutPoint::default(),
-            script_sig: bitcoin::ScriptBuf::new(),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             sequence: Sequence::from_height(100),
             witness: Witness::default(),
         };
@@ -1304,13 +1259,8 @@ mod tests {
         bare.satisfy(&mut txin, &satisfier).expect("satisfaction");
         assert_eq!(
             txin,
-<<<<<<< HEAD
             groestlcoin::TxIn {
                 previous_output: groestlcoin::OutPoint::default(),
-=======
-            bitcoin::TxIn {
-                previous_output: bitcoin::OutPoint::default(),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 script_sig: script::Builder::new()
                     .push_slice(<&PushBytes>::try_from(sigser.as_slice()).unwrap())
                     .into_script(),
@@ -1318,11 +1268,7 @@ mod tests {
                 witness: Witness::default(),
             }
         );
-<<<<<<< HEAD
         assert_eq!(bare.unsigned_script_sig(), groestlcoin::ScriptBuf::new());
-=======
-        assert_eq!(bare.unsigned_script_sig(), bitcoin::ScriptBuf::new());
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         let pkh = Descriptor::new_pkh(pk).unwrap();
         pkh.satisfy(&mut txin, &satisfier).expect("satisfaction");
@@ -1338,34 +1284,20 @@ mod tests {
                 witness: Witness::default(),
             }
         );
-<<<<<<< HEAD
         assert_eq!(pkh.unsigned_script_sig(), groestlcoin::ScriptBuf::new());
-=======
-        assert_eq!(pkh.unsigned_script_sig(), bitcoin::ScriptBuf::new());
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         let wpkh = Descriptor::new_wpkh(pk).unwrap();
         wpkh.satisfy(&mut txin, &satisfier).expect("satisfaction");
         assert_eq!(
             txin,
-<<<<<<< HEAD
             groestlcoin::TxIn {
                 previous_output: groestlcoin::OutPoint::default(),
                 script_sig: groestlcoin::ScriptBuf::new(),
-=======
-            bitcoin::TxIn {
-                previous_output: bitcoin::OutPoint::default(),
-                script_sig: bitcoin::ScriptBuf::new(),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 sequence: Sequence::from_height(100),
                 witness: Witness::from_slice(&vec![sigser.clone(), pk.to_bytes(),]),
             }
         );
-<<<<<<< HEAD
         assert_eq!(wpkh.unsigned_script_sig(), groestlcoin::ScriptBuf::new());
-=======
-        assert_eq!(wpkh.unsigned_script_sig(), bitcoin::ScriptBuf::new());
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         let shwpkh = Descriptor::new_sh_wpkh(pk).unwrap();
         shwpkh.satisfy(&mut txin, &satisfier).expect("satisfaction");
@@ -1410,11 +1342,7 @@ mod tests {
                 witness: Witness::default(),
             }
         );
-<<<<<<< HEAD
         assert_eq!(sh.unsigned_script_sig(), groestlcoin::ScriptBuf::new());
-=======
-        assert_eq!(sh.unsigned_script_sig(), bitcoin::ScriptBuf::new());
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         let ms = ms_str!("c:pk_k({})", pk);
 
@@ -1422,24 +1350,14 @@ mod tests {
         wsh.satisfy(&mut txin, &satisfier).expect("satisfaction");
         assert_eq!(
             txin,
-<<<<<<< HEAD
             groestlcoin::TxIn {
                 previous_output: groestlcoin::OutPoint::default(),
                 script_sig: groestlcoin::ScriptBuf::new(),
-=======
-            bitcoin::TxIn {
-                previous_output: bitcoin::OutPoint::default(),
-                script_sig: bitcoin::ScriptBuf::new(),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 sequence: Sequence::from_height(100),
                 witness: Witness::from_slice(&vec![sigser.clone(), ms.encode().into_bytes(),]),
             }
         );
-<<<<<<< HEAD
         assert_eq!(wsh.unsigned_script_sig(), groestlcoin::ScriptBuf::new());
-=======
-        assert_eq!(wsh.unsigned_script_sig(), bitcoin::ScriptBuf::new());
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
         let shwsh = Descriptor::new_sh_wsh(ms.clone()).unwrap();
         shwsh.satisfy(&mut txin, &satisfier).expect("satisfaction");
@@ -1584,15 +1502,9 @@ mod tests {
         ))
         .unwrap();
 
-<<<<<<< HEAD
         let mut txin = groestlcoin::TxIn {
             previous_output: groestlcoin::OutPoint::default(),
             script_sig: groestlcoin::ScriptBuf::new(),
-=======
-        let mut txin = bitcoin::TxIn {
-            previous_output: bitcoin::OutPoint::default(),
-            script_sig: bitcoin::ScriptBuf::new(),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             sequence: Sequence::ZERO,
             witness: Witness::default(),
         };
@@ -1601,22 +1513,14 @@ mod tests {
 
             satisfier.insert(
                 a,
-<<<<<<< HEAD
                 groestlcoin::ecdsa::Signature {
-=======
-                bitcoin::ecdsa::Signature {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                     sig: sig_a,
                     hash_ty: EcdsaSighashType::All,
                 },
             );
             satisfier.insert(
                 b,
-<<<<<<< HEAD
                 groestlcoin::ecdsa::Signature {
-=======
-                bitcoin::ecdsa::Signature {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                     sig: sig_b,
                     hash_ty: EcdsaSighashType::All,
                 },
@@ -1822,11 +1726,7 @@ mod tests {
                 .unwrap()
                 .address(groestlcoin::Network::Groestlcoin)
                 .unwrap();
-<<<<<<< HEAD
             let addr_expected = groestlcoin::Address::from_str(raw_addr_expected)
-=======
-            let addr_expected = bitcoin::Address::from_str(raw_addr_expected)
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
                 .unwrap()
                 .assume_checked();
             assert_eq!(addr_one, addr_expected);
@@ -1959,11 +1859,7 @@ pk(03f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8))";
     #[test]
     fn test_find_derivation_index_for_spk() {
         let secp = secp256k1::Secp256k1::verification_only();
-<<<<<<< HEAD
         let descriptor = Descriptor::from_str("tr([73c5da0a/86'/0'/0']xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92qc3WTR/0/*)").unwrap();
-=======
-        let descriptor = Descriptor::from_str("tr([73c5da0a/86'/0'/0']xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92pReUsQ/0/*)").unwrap();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         let script_at_0_1 = ScriptBuf::from_hex(
             "5120a82f29944d65b86ae6b5e5cc75e294ead6c59391a1edc5e016e3498c67fc7bbb",
         )
@@ -2101,65 +1997,15 @@ pk(03f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8))";
 
     #[test]
     fn test_context_pks() {
-        let comp_key = bitcoin::PublicKey::from_str(
+        let comp_key = groestlcoin::PublicKey::from_str(
             "02015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab",
         )
         .unwrap();
-        let x_only_key = bitcoin::key::XOnlyPublicKey::from_str(
+        let x_only_key = groestlcoin::key::XOnlyPublicKey::from_str(
             "015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab",
         )
         .unwrap();
-        let uncomp_key = bitcoin::PublicKey::from_str("04015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab0d46021e9e69ef061eb25eab41ae206187b2b05e829559df59d78319bd9267b4").unwrap();
-
-        type Desc = Descriptor<DescriptorPublicKey>;
-
-        // Legacy tests, x-only keys are not supported
-        Desc::from_str(&format!("sh(pk({}))", comp_key)).unwrap();
-        Desc::from_str(&format!("sh(pk({}))", uncomp_key)).unwrap();
-        Desc::from_str(&format!("sh(pk({}))", x_only_key)).unwrap_err();
-
-        // bare tests, x-only keys not supported
-        Desc::from_str(&format!("pk({})", comp_key)).unwrap();
-        Desc::from_str(&format!("pk({})", uncomp_key)).unwrap();
-        Desc::from_str(&format!("pk({})", x_only_key)).unwrap_err();
-
-        // pkh tests, x-only keys not supported
-        Desc::from_str(&format!("pkh({})", comp_key)).unwrap();
-        Desc::from_str(&format!("pkh({})", uncomp_key)).unwrap();
-        Desc::from_str(&format!("pkh({})", x_only_key)).unwrap_err();
-
-        // wpkh tests, uncompressed and x-only keys not supported
-        Desc::from_str(&format!("wpkh({})", comp_key)).unwrap();
-        Desc::from_str(&format!("wpkh({})", uncomp_key)).unwrap_err();
-        Desc::from_str(&format!("wpkh({})", x_only_key)).unwrap_err();
-
-        // Segwitv0 tests, uncompressed and x-only keys not supported
-        Desc::from_str(&format!("wsh(pk({}))", comp_key)).unwrap();
-        Desc::from_str(&format!("wsh(pk({}))", uncomp_key)).unwrap_err();
-        Desc::from_str(&format!("wsh(pk({}))", x_only_key)).unwrap_err();
-
-        // Tap tests, key path
-        Desc::from_str(&format!("tr({})", comp_key)).unwrap();
-        Desc::from_str(&format!("tr({})", uncomp_key)).unwrap_err();
-        Desc::from_str(&format!("tr({})", x_only_key)).unwrap();
-
-        // Tap tests, script path
-        Desc::from_str(&format!("tr({},pk({}))", x_only_key, comp_key)).unwrap();
-        Desc::from_str(&format!("tr({},pk({}))", x_only_key, uncomp_key)).unwrap_err();
-        Desc::from_str(&format!("tr({},pk({}))", x_only_key, x_only_key)).unwrap();
-    }
-
-    #[test]
-    fn test_context_pks() {
-        let comp_key = bitcoin::PublicKey::from_str(
-            "02015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab",
-        )
-        .unwrap();
-        let x_only_key = bitcoin::key::XOnlyPublicKey::from_str(
-            "015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab",
-        )
-        .unwrap();
-        let uncomp_key = bitcoin::PublicKey::from_str("04015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab0d46021e9e69ef061eb25eab41ae206187b2b05e829559df59d78319bd9267b4").unwrap();
+        let uncomp_key = groestlcoin::PublicKey::from_str("04015e4cb53458bf813db8c79968e76e10d13ed6426a23fa71c2f41ba021c2a7ab0d46021e9e69ef061eb25eab41ae206187b2b05e829559df59d78319bd9267b4").unwrap();
 
         type Desc = Descriptor<DescriptorPublicKey>;
 

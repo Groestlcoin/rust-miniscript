@@ -11,15 +11,9 @@ use core::marker::PhantomData;
 #[cfg(feature = "std")]
 use std::error;
 
-<<<<<<< HEAD
 use groestlcoin::constants::MAX_BLOCK_WEIGHT;
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 use groestlcoin::Sequence;
-=======
-use bitcoin::constants::MAX_BLOCK_WEIGHT;
-use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
-use bitcoin::Sequence;
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use sync::Arc;
 
 use crate::miniscript::lex::{Token as Tk, TokenIter};
@@ -30,11 +24,7 @@ use crate::miniscript::ScriptContext;
 use crate::prelude::*;
 #[cfg(doc)]
 use crate::Descriptor;
-<<<<<<< HEAD
 use crate::{groestlcoin, hash256, AbsLockTime, Error, Miniscript, MiniscriptKey, ToPublicKey};
-=======
-use crate::{bitcoin, hash256, AbsLockTime, Error, Miniscript, MiniscriptKey, ToPublicKey};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 fn return_none<T>(_: usize) -> Option<T> {
     None
@@ -63,11 +53,7 @@ impl ParseableKey for groestlcoin::secp256k1::XOnlyPublicKey {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum KeyParseError {
     /// Bitcoin PublicKey parse error
-<<<<<<< HEAD
     FullKeyParseError(groestlcoin::key::Error),
-=======
-    FullKeyParseError(bitcoin::key::Error),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// Xonly key parse Error
     XonlyKeyParseError(groestlcoin::secp256k1::Error),
 }

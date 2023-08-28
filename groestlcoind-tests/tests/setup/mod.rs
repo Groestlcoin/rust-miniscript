@@ -8,8 +8,8 @@ pub mod test_util;
 
 // Launch an instance of groestlcoind with
 pub fn setup() -> BitcoinD {
-    // Create env var BITCOIND_EXE_PATH to point to the ../groestlcoind/bin/groestlcoind binary
-    let key = "BITCOIND_EXE";
+    // Create env var GROESTLCOIND_EXE_PATH to point to the ../groestlcoind/bin/groestlcoind binary
+    let key = "GROESTLCOIND_EXE";
     if std::env::var(key).is_err() {
         let mut root_path = std::env::current_dir().unwrap();
         while std::fs::metadata(root_path.join("LICENSE")).is_err() {
@@ -19,9 +19,9 @@ pub fn setup() -> BitcoinD {
         }
 
         let bitcoind_path = root_path
-            .join("bitcoind-tests")
+            .join("groestlcoind-tests")
             .join("bin")
-            .join("bitcoind");
+            .join("groestlcoind");
         std::env::set_var(key, bitcoind_path);
     }
 
@@ -30,7 +30,7 @@ pub fn setup() -> BitcoinD {
     let cl = &bitcoind.client;
     // generate to an address by the wallet. And wait for funds to mature
     let addr = cl.get_new_address(None, None).unwrap();
-    let blks = cl.generate_to_address(101, &addr).unwrap();
+    let blks = cl.generate_to_address(101, &addr).unwrap().assume_checked();
     assert_eq!(blks.len(), 101);
 
     assert_eq!(

@@ -5,13 +5,8 @@ use core::{fmt, hash};
 #[cfg(feature = "std")]
 use std::error;
 
-<<<<<<< HEAD
 use groestlcoin::constants::MAX_BLOCK_WEIGHT;
 use groestlcoin::hashes::{hash160, ripemd160, sha256};
-=======
-use bitcoin::constants::MAX_BLOCK_WEIGHT;
-use bitcoin::hashes::{hash160, ripemd160, sha256};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::decode::ParseableKey;
 use crate::miniscript::limits::{

@@ -1,7 +1,7 @@
 [package]
 name = "groestlcoind-tests"
 version = "0.1.0"
-authors = ["sanket1729 <sanket1729@gmail.com>"]
+authors = ["Groestlcoin Developers <groestlcoin@gmail.com>"]
 edition = "2018"
 publish = false
 
@@ -12,4 +12,4 @@ miniscript = {path = "../"}
 bitcoind = { version = "0.30.0" }
 actual-rand = { package = "rand", version = "0.8.4"}
 secp256k1 = {version = "0.27.0", features = ["rand-std"]}
-internals = { package = "bitcoin-private", version = "0.1.0", default_features = false }
+internals = { package = "groestlcoin-private", version = "0.1.0", default_features = false }

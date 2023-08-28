@@ -5,13 +5,8 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::error;
 
-<<<<<<< HEAD
 use groestlcoin::hashes::hash160;
 use groestlcoin::{secp256k1, taproot};
-=======
-use bitcoin::hashes::hash160;
-use bitcoin::{secp256k1, taproot};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use internals::hex::display::DisplayHex;
 
 use super::BitcoinKey;
@@ -36,11 +31,7 @@ pub enum Error {
     /// General Interpreter error.
     CouldNotEvaluate,
     /// ECDSA Signature related error
-<<<<<<< HEAD
     EcdsaSig(groestlcoin::ecdsa::Error),
-=======
-    EcdsaSig(bitcoin::ecdsa::Error),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// We expected a push (including a `OP_1` but no other numeric pushes)
     ExpectedPush,
     /// The preimage to the hash function must be exactly 32 bytes.
@@ -60,11 +51,7 @@ pub enum Error {
     /// ecdsa Signature failed to verify
     InvalidEcdsaSignature(groestlcoin::PublicKey),
     /// Signature failed to verify
-<<<<<<< HEAD
     InvalidSchnorrSignature(groestlcoin::key::XOnlyPublicKey),
-=======
-    InvalidSchnorrSignature(bitcoin::key::XOnlyPublicKey),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// Last byte of this signature isn't a standard sighash type
     NonStandardSighash(Vec<u8>),
     /// Miniscript error
@@ -102,15 +89,9 @@ pub enum Error {
     /// Miniscript requires the entire top level script to be satisfied.
     ScriptSatisfactionError,
     /// Schnorr Signature error
-<<<<<<< HEAD
     SchnorrSig(groestlcoin::taproot::Error),
     /// Errors in signature hash calculations
     SighashError(groestlcoin::sighash::Error),
-=======
-    SchnorrSig(bitcoin::taproot::Error),
-    /// Errors in signature hash calculations
-    SighashError(bitcoin::sighash::Error),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// Taproot Annex Unsupported
     TapAnnexUnsupported,
     /// An uncompressed public key was encountered in a context where it is
@@ -261,37 +242,22 @@ impl From<secp256k1::Error> for Error {
 }
 
 #[doc(hidden)]
-<<<<<<< HEAD
 impl From<groestlcoin::sighash::Error> for Error {
     fn from(e: groestlcoin::sighash::Error) -> Error {
-=======
-impl From<bitcoin::sighash::Error> for Error {
-    fn from(e: bitcoin::sighash::Error) -> Error {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         Error::SighashError(e)
     }
 }
 
 #[doc(hidden)]
-<<<<<<< HEAD
 impl From<groestlcoin::ecdsa::Error> for Error {
     fn from(e: groestlcoin::ecdsa::Error) -> Error {
-=======
-impl From<bitcoin::ecdsa::Error> for Error {
-    fn from(e: bitcoin::ecdsa::Error) -> Error {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         Error::EcdsaSig(e)
     }
 }
 
 #[doc(hidden)]
-<<<<<<< HEAD
 impl From<groestlcoin::taproot::Error> for Error {
     fn from(e: groestlcoin::taproot::Error) -> Error {
-=======
-impl From<bitcoin::taproot::Error> for Error {
-    fn from(e: bitcoin::taproot::Error) -> Error {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         Error::SchnorrSig(e)
     }
 }
@@ -310,11 +276,7 @@ pub enum PkEvalErrInner {
     /// Full Key
     FullKey(groestlcoin::PublicKey),
     /// XOnly Key
-<<<<<<< HEAD
     XOnlyKey(groestlcoin::key::XOnlyPublicKey),
-=======
-    XOnlyKey(bitcoin::key::XOnlyPublicKey),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 }
 
 impl From<BitcoinKey> for PkEvalErrInner {

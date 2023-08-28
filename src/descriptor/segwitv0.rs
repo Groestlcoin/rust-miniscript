@@ -8,11 +8,7 @@
 
 use core::fmt;
 
-<<<<<<< HEAD
 use groestlcoin::{Address, Network, ScriptBuf};
-=======
-use bitcoin::{Address, Network, ScriptBuf};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::checksum::{self, verify_checksum};
 use super::SortedMultiVec;
@@ -369,11 +365,7 @@ impl<Pk: MiniscriptKey> Wpkh<Pk> {
 impl<Pk: MiniscriptKey + ToPublicKey> Wpkh<Pk> {
     /// Obtains the corresponding script pubkey for this descriptor.
     pub fn script_pubkey(&self) -> ScriptBuf {
-<<<<<<< HEAD
         let addr = Address::p2wpkh(&self.pk.to_public_key(), Network::Groestlcoin)
-=======
-        let addr = Address::p2wpkh(&self.pk.to_public_key(), Network::Bitcoin)
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             .expect("wpkh descriptors have compressed keys");
         addr.script_pubkey()
     }

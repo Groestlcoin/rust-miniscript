@@ -20,13 +20,8 @@
 use std::str::FromStr;
 
 use actual_rand as rand;
-<<<<<<< HEAD:groestlcoind-tests/tests/setup/test_util.rs
 use groestlcoin::hashes::{hash160, ripemd160, sha256, Hash};
 use groestlcoin::secp256k1;
-=======
-use bitcoin::hashes::{hash160, ripemd160, sha256, Hash};
-use bitcoin::secp256k1;
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/setup/test_util.rs
 use internals::hex::exts::DisplayHex;
 use miniscript::descriptor::{SinglePub, SinglePubKey};
 use miniscript::{
@@ -38,11 +33,7 @@ use secp256k1::XOnlyPublicKey;
 
 #[derive(Clone, Debug)]
 pub struct PubData {
-<<<<<<< HEAD:groestlcoind-tests/tests/setup/test_util.rs
     pub pks: Vec<groestlcoin::PublicKey>,
-=======
-    pub pks: Vec<bitcoin::PublicKey>,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/setup/test_util.rs
     pub x_only_pks: Vec<XOnlyPublicKey>,
     pub sha256: sha256::Hash,
     pub hash256: hash256::Hash,
@@ -52,13 +43,8 @@ pub struct PubData {
 
 #[derive(Debug, Clone)]
 pub struct SecretData {
-<<<<<<< HEAD:groestlcoind-tests/tests/setup/test_util.rs
     pub sks: Vec<groestlcoin::secp256k1::SecretKey>,
     pub x_only_keypairs: Vec<groestlcoin::secp256k1::KeyPair>,
-=======
-    pub sks: Vec<bitcoin::secp256k1::SecretKey>,
-    pub x_only_keypairs: Vec<bitcoin::secp256k1::KeyPair>,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/setup/test_util.rs
     pub sha256_pre: [u8; 32],
     pub hash256_pre: [u8; 32],
     pub ripemd160_pre: [u8; 32],
@@ -74,15 +60,9 @@ pub struct TestData {
 fn setup_keys(
     n: usize,
 ) -> (
-<<<<<<< HEAD:groestlcoind-tests/tests/setup/test_util.rs
     Vec<groestlcoin::secp256k1::SecretKey>,
     Vec<miniscript::groestlcoin::PublicKey>,
     Vec<groestlcoin::secp256k1::KeyPair>,
-=======
-    Vec<bitcoin::secp256k1::SecretKey>,
-    Vec<miniscript::bitcoin::PublicKey>,
-    Vec<bitcoin::secp256k1::KeyPair>,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/setup/test_util.rs
     Vec<XOnlyPublicKey>,
 ) {
     let secp_sign = secp256k1::Secp256k1::signing_only();
@@ -107,11 +87,7 @@ fn setup_keys(
     let mut x_only_pks = vec![];
 
     for i in 0..n {
-<<<<<<< HEAD:groestlcoind-tests/tests/setup/test_util.rs
         let keypair = groestlcoin::secp256k1::KeyPair::from_secret_key(&secp_sign, &sks[i]);
-=======
-        let keypair = bitcoin::secp256k1::KeyPair::from_secret_key(&secp_sign, &sks[i]);
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/setup/test_util.rs
         let (xpk, _parity) = XOnlyPublicKey::from_keypair(&keypair);
         x_only_keypairs.push(keypair);
         x_only_pks.push(xpk);

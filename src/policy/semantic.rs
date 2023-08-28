@@ -6,11 +6,7 @@
 use core::str::FromStr;
 use core::{fmt, str};
 
-<<<<<<< HEAD
 use groestlcoin::{absolute, Sequence};
-=======
-use bitcoin::{absolute, Sequence};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::concrete::PolicyError;
 use super::ENTAILMENT_MAX_TERMINALS;

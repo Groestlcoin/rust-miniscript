@@ -9,19 +9,12 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-<<<<<<< HEAD:groestlcoind-tests/tests/test_cpp.rs
 use groestlcoin::hashes::{sha256d, Hash};
 use groestlcoin::psbt::Psbt;
 use groestlcoin::secp256k1::{self, Secp256k1};
 use groestlcoin::{psbt, Amount, OutPoint, Sequence, Transaction, TxIn, TxOut, Txid};
-=======
-use bitcoin::hashes::{sha256d, Hash};
-use bitcoin::psbt::Psbt;
-use bitcoin::secp256k1::{self, Secp256k1};
-use bitcoin::{psbt, Amount, OutPoint, Sequence, Transaction, TxIn, TxOut, Txid};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/test_cpp.rs
 use bitcoind::bitcoincore_rpc::{json, Client, RpcApi};
-use miniscript::bitcoin::absolute;
+use miniscript::groestlcoin::absolute;
 use miniscript::psbt::PsbtExt;
 use miniscript::{groestlcoin, Descriptor};
 
@@ -182,13 +175,8 @@ pub fn test_from_cpp_ms(cl: &Client, testdata: &TestData) {
             .collect();
         // Get the required sighash message
         let amt = btc(1).to_sat();
-<<<<<<< HEAD:groestlcoind-tests/tests/test_cpp.rs
         let mut sighash_cache = groestlcoin::sighash::SighashCache::new(&psbts[i].unsigned_tx);
         let sighash_ty = groestlcoin::sighash::EcdsaSighashType::All;
-=======
-        let mut sighash_cache = bitcoin::sighash::SighashCache::new(&psbts[i].unsigned_tx);
-        let sighash_ty = bitcoin::sighash::EcdsaSighashType::All;
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/test_cpp.rs
         let sighash = sighash_cache
             .segwit_signature_hash(0, &ms.encode(), amt, sighash_ty)
             .unwrap();
@@ -203,11 +191,7 @@ pub fn test_from_cpp_ms(cl: &Client, testdata: &TestData) {
             let pk = pks[sks.iter().position(|&x| x == sk).unwrap()];
             psbts[i].inputs[0].partial_sigs.insert(
                 pk,
-<<<<<<< HEAD:groestlcoind-tests/tests/test_cpp.rs
                 groestlcoin::ecdsa::Signature {
-=======
-                bitcoin::ecdsa::Signature {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0):bitcoind-tests/tests/test_cpp.rs
                     sig,
                     hash_ty: sighash_ty,
                 },

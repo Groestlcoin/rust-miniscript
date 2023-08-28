@@ -11,13 +11,8 @@
 use core::convert::TryFrom;
 use core::fmt;
 
-<<<<<<< HEAD
 use groestlcoin::script::PushBytes;
 use groestlcoin::{script, Address, Network, ScriptBuf};
-=======
-use bitcoin::script::PushBytes;
-use bitcoin::{script, Address, Network, ScriptBuf};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::checksum::{self, verify_checksum};
 use super::{SortedMultiVec, Wpkh, Wsh};

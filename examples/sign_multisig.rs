@@ -17,13 +17,8 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
-<<<<<<< HEAD
 use groestlcoin::blockdata::witness::Witness;
 use groestlcoin::{absolute, ecdsa, secp256k1, Sequence};
-=======
-use bitcoin::blockdata::witness::Witness;
-use bitcoin::{absolute, ecdsa, secp256k1, Sequence};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 fn main() {
     let mut tx = spending_transaction();
@@ -68,11 +63,7 @@ fn main() {
     // Attempt to satisfy at age 0, height 0.
     let original_txin = tx.input[0].clone();
 
-<<<<<<< HEAD
     let mut sigs = HashMap::<groestlcoin::PublicKey, ecdsa::Signature>::new();
-=======
-    let mut sigs = HashMap::<bitcoin::PublicKey, ecdsa::Signature>::new();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
     // Doesn't work with no signatures.
     assert!(descriptor.satisfy(&mut tx.input[0], &sigs).is_err());
@@ -101,7 +92,6 @@ fn spending_transaction() -> groestlcoin::Transaction {
     groestlcoin::Transaction {
         version: 2,
         lock_time: absolute::LockTime::ZERO,
-<<<<<<< HEAD
         input: vec![groestlcoin::TxIn {
             previous_output: Default::default(),
             script_sig: groestlcoin::ScriptBuf::new(),
@@ -110,16 +100,6 @@ fn spending_transaction() -> groestlcoin::Transaction {
         }],
         output: vec![groestlcoin::TxOut {
             script_pubkey: groestlcoin::ScriptBuf::new(),
-=======
-        input: vec![bitcoin::TxIn {
-            previous_output: Default::default(),
-            script_sig: bitcoin::ScriptBuf::new(),
-            sequence: Sequence::MAX,
-            witness: Witness::default(),
-        }],
-        output: vec![bitcoin::TxOut {
-            script_pubkey: bitcoin::ScriptBuf::new(),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             value: 100_000_000,
         }],
     }
@@ -158,10 +138,6 @@ fn random_signature_from_the_blockchain() -> ecdsa::Signature {
              531d75c136272f127a5dc14acc0722301cbddc222262934151f140da345af177",
         )
         .unwrap(),
-<<<<<<< HEAD
         hash_ty: groestlcoin::sighash::EcdsaSighashType::All,
-=======
-        hash_ty: bitcoin::sighash::EcdsaSighashType::All,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     }
 }

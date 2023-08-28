@@ -10,13 +10,8 @@
 
 use core::fmt;
 
-<<<<<<< HEAD
 use groestlcoin::script::{self, PushBytes};
 use groestlcoin::{Address, Network, ScriptBuf};
-=======
-use bitcoin::script::{self, PushBytes};
-use bitcoin::{Address, Network, ScriptBuf};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use super::checksum::{self, verify_checksum};
 use crate::expression::{self, FromTree};

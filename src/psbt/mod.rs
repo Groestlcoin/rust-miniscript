@@ -13,21 +13,12 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::error;
 
-<<<<<<< HEAD
 use groestlcoin::hashes::{hash160, sha256d, Hash};
 use groestlcoin::psbt::{self, Psbt};
 use groestlcoin::secp256k1::{self, Secp256k1, VerifyOnly};
 use groestlcoin::sighash::{self, SighashCache};
 use groestlcoin::taproot::{self, ControlBlock, LeafVersion, TapLeafHash};
 use groestlcoin::{absolute, bip32, Script, ScriptBuf, Sequence};
-=======
-use bitcoin::hashes::{hash160, sha256d, Hash};
-use bitcoin::psbt::{self, Psbt};
-use bitcoin::secp256k1::{self, Secp256k1, VerifyOnly};
-use bitcoin::sighash::{self, SighashCache};
-use bitcoin::taproot::{self, ControlBlock, LeafVersion, TapLeafHash};
-use bitcoin::{absolute, bip32, Script, ScriptBuf, Sequence};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
 use crate::miniscript::context::SigType;
 use crate::prelude::*;
@@ -98,11 +89,7 @@ pub enum InputError {
     /// Get the secp Errors directly
     SecpErr(groestlcoin::secp256k1::Error),
     /// Key errors
-<<<<<<< HEAD
     KeyErr(groestlcoin::key::Error),
-=======
-    KeyErr(bitcoin::key::Error),
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// Could not satisfy taproot descriptor
     /// This error is returned when both script path and key paths could not be
     /// satisfied. We cannot return a detailed error because we try all miniscripts
@@ -259,13 +246,8 @@ impl From<groestlcoin::secp256k1::Error> for InputError {
 }
 
 #[doc(hidden)]
-<<<<<<< HEAD
 impl From<groestlcoin::key::Error> for InputError {
     fn from(e: groestlcoin::key::Error) -> InputError {
-=======
-impl From<bitcoin::key::Error> for InputError {
-    fn from(e: bitcoin::key::Error) -> InputError {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         InputError::KeyErr(e)
     }
 }
@@ -291,11 +273,7 @@ impl<'psbt> PsbtInputSatisfier<'psbt> {
 }
 
 impl<'psbt, Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for PsbtInputSatisfier<'psbt> {
-<<<<<<< HEAD
     fn lookup_tap_key_spend_sig(&self) -> Option<groestlcoin::taproot::Signature> {
-=======
-    fn lookup_tap_key_spend_sig(&self) -> Option<bitcoin::taproot::Signature> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         self.psbt.inputs[self.index].tap_key_sig
     }
 
@@ -303,11 +281,7 @@ impl<'psbt, Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for PsbtInputSatisfie
         &self,
         pk: &Pk,
         lh: &TapLeafHash,
-<<<<<<< HEAD
     ) -> Option<groestlcoin::taproot::Signature> {
-=======
-    ) -> Option<bitcoin::taproot::Signature> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         self.psbt.inputs[self.index]
             .tap_script_sigs
             .get(&(pk.to_x_only_pubkey(), *lh))
@@ -324,11 +298,7 @@ impl<'psbt, Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for PsbtInputSatisfie
 
     fn lookup_tap_control_block_map(
         &self,
-<<<<<<< HEAD
     ) -> Option<&BTreeMap<ControlBlock, (groestlcoin::ScriptBuf, LeafVersion)>> {
-=======
-    ) -> Option<&BTreeMap<ControlBlock, (bitcoin::ScriptBuf, LeafVersion)>> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         Some(&self.psbt.inputs[self.index].tap_scripts)
     }
 
@@ -336,13 +306,8 @@ impl<'psbt, Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for PsbtInputSatisfie
         &self,
         pkh: &(hash160::Hash, TapLeafHash),
     ) -> Option<(
-<<<<<<< HEAD
         groestlcoin::secp256k1::XOnlyPublicKey,
         groestlcoin::taproot::Signature,
-=======
-        bitcoin::secp256k1::XOnlyPublicKey,
-        bitcoin::taproot::Signature,
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     )> {
         self.psbt.inputs[self.index]
             .tap_script_sigs
@@ -353,11 +318,7 @@ impl<'psbt, Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for PsbtInputSatisfie
             .map(|((x_only_pk, _leaf_hash), sig)| (*x_only_pk, *sig))
     }
 
-<<<<<<< HEAD
     fn lookup_ecdsa_sig(&self, pk: &Pk) -> Option<groestlcoin::ecdsa::Signature> {
-=======
-    fn lookup_ecdsa_sig(&self, pk: &Pk) -> Option<bitcoin::ecdsa::Signature> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         self.psbt.inputs[self.index]
             .partial_sigs
             .get(&pk.to_public_key())
@@ -367,11 +328,7 @@ impl<'psbt, Pk: MiniscriptKey + ToPublicKey> Satisfier<Pk> for PsbtInputSatisfie
     fn lookup_raw_pkh_ecdsa_sig(
         &self,
         pkh: &hash160::Hash,
-<<<<<<< HEAD
     ) -> Option<(groestlcoin::PublicKey, groestlcoin::ecdsa::Signature)> {
-=======
-    ) -> Option<(bitcoin::PublicKey, bitcoin::ecdsa::Signature)> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         self.psbt.inputs[self.index]
             .partial_sigs
             .iter()
@@ -634,13 +591,8 @@ pub trait PsbtExt {
     ///
     /// Based on the sighash
     /// flag specified in the [`Psbt`] sighash field. If the input sighash flag psbt field is `None`
-<<<<<<< HEAD
     /// the [`sighash::TapSighashType::Default`](groestlcoin::sighash::TapSighashType::Default) is chosen
     /// for for taproot spends, otherwise [`EcdsaSighashType::All`](groestlcoin::sighash::EcdsaSighashType::All) is chosen.
-=======
-    /// the [`sighash::TapSighashType::Default`](bitcoin::sighash::TapSighashType::Default) is chosen
-    /// for for taproot spends, otherwise [`EcdsaSighashType::All`](bitcoin::sighash::EcdsaSighashType::All) is chosen.
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     /// If the utxo at `idx` is a taproot output, returns a [`PsbtSighashMsg::TapSighash`] variant.
     /// If the utxo at `idx` is a pre-taproot segwit output, returns a [`PsbtSighashMsg::SegwitV0Sighash`] variant.
     /// For legacy outputs, returns a [`PsbtSighashMsg::LegacySighash`] variant.
@@ -655,13 +607,8 @@ pub trait PsbtExt {
     /// * `cache`: The [`SighashCache`] for used to cache/read previously cached computations
     /// * `tapleaf_hash`: If the output is taproot, compute the sighash for this particular leaf.
     ///
-<<<<<<< HEAD
     /// [`SighashCache`]: groestlcoin::sighash::SighashCache
     fn sighash_msg<T: Borrow<groestlcoin::Transaction>>(
-=======
-    /// [`SighashCache`]: bitcoin::sighash::SighashCache
-    fn sighash_msg<T: Borrow<bitcoin::Transaction>>(
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         &self,
         idx: usize,
         cache: &mut SighashCache<T>,
@@ -897,11 +844,7 @@ impl PsbtExt for Psbt {
         Ok(())
     }
 
-<<<<<<< HEAD
     fn sighash_msg<T: Borrow<groestlcoin::Transaction>>(
-=======
-    fn sighash_msg<T: Borrow<bitcoin::Transaction>>(
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         &self,
         idx: usize,
         cache: &mut SighashCache<T>,
@@ -915,11 +858,7 @@ impl PsbtExt for Psbt {
         let prevouts = finalizer::prevouts(self).map_err(|_e| SighashError::MissingSpendUtxos)?;
         // Note that as per Psbt spec we should have access to spent_utxos for the transaction
         // Even if the transaction does not require SighashAll, we create `Prevouts::All` for code simplicity
-<<<<<<< HEAD
         let prevouts = groestlcoin::sighash::Prevouts::All(&prevouts);
-=======
-        let prevouts = bitcoin::sighash::Prevouts::All(&prevouts);
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         let inp_spk =
             finalizer::get_scriptpubkey(self, idx).map_err(|_e| SighashError::MissingInputUtxo)?;
         if inp_spk.is_v1_p2tr() {
@@ -1107,17 +1046,10 @@ trait PsbtFields {
     fn redeem_script(&mut self) -> &mut Option<ScriptBuf>;
     fn witness_script(&mut self) -> &mut Option<ScriptBuf>;
     fn bip32_derivation(&mut self) -> &mut BTreeMap<secp256k1::PublicKey, bip32::KeySource>;
-<<<<<<< HEAD
     fn tap_internal_key(&mut self) -> &mut Option<groestlcoin::key::XOnlyPublicKey>;
     fn tap_key_origins(
         &mut self,
     ) -> &mut BTreeMap<groestlcoin::key::XOnlyPublicKey, (Vec<TapLeafHash>, bip32::KeySource)>;
-=======
-    fn tap_internal_key(&mut self) -> &mut Option<bitcoin::key::XOnlyPublicKey>;
-    fn tap_key_origins(
-        &mut self,
-    ) -> &mut BTreeMap<bitcoin::key::XOnlyPublicKey, (Vec<TapLeafHash>, bip32::KeySource)>;
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
     fn proprietary(&mut self) -> &mut BTreeMap<psbt::raw::ProprietaryKey, Vec<u8>>;
     fn unknown(&mut self) -> &mut BTreeMap<psbt::raw::Key, Vec<u8>>;
 
@@ -1145,20 +1077,12 @@ impl PsbtFields for psbt::Input {
     fn bip32_derivation(&mut self) -> &mut BTreeMap<secp256k1::PublicKey, bip32::KeySource> {
         &mut self.bip32_derivation
     }
-<<<<<<< HEAD
     fn tap_internal_key(&mut self) -> &mut Option<groestlcoin::key::XOnlyPublicKey> {
-=======
-    fn tap_internal_key(&mut self) -> &mut Option<bitcoin::key::XOnlyPublicKey> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         &mut self.tap_internal_key
     }
     fn tap_key_origins(
         &mut self,
-<<<<<<< HEAD
     ) -> &mut BTreeMap<groestlcoin::key::XOnlyPublicKey, (Vec<TapLeafHash>, bip32::KeySource)> {
-=======
-    ) -> &mut BTreeMap<bitcoin::key::XOnlyPublicKey, (Vec<TapLeafHash>, bip32::KeySource)> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         &mut self.tap_key_origins
     }
     fn proprietary(&mut self) -> &mut BTreeMap<psbt::raw::ProprietaryKey, Vec<u8>> {
@@ -1186,20 +1110,12 @@ impl PsbtFields for psbt::Output {
     fn bip32_derivation(&mut self) -> &mut BTreeMap<secp256k1::PublicKey, bip32::KeySource> {
         &mut self.bip32_derivation
     }
-<<<<<<< HEAD
     fn tap_internal_key(&mut self) -> &mut Option<groestlcoin::key::XOnlyPublicKey> {
-=======
-    fn tap_internal_key(&mut self) -> &mut Option<bitcoin::key::XOnlyPublicKey> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         &mut self.tap_internal_key
     }
     fn tap_key_origins(
         &mut self,
-<<<<<<< HEAD
     ) -> &mut BTreeMap<groestlcoin::key::XOnlyPublicKey, (Vec<TapLeafHash>, bip32::KeySource)> {
-=======
-    ) -> &mut BTreeMap<bitcoin::key::XOnlyPublicKey, (Vec<TapLeafHash>, bip32::KeySource)> {
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         &mut self.tap_key_origins
     }
     fn proprietary(&mut self) -> &mut BTreeMap<psbt::raw::ProprietaryKey, Vec<u8>> {
@@ -1538,21 +1454,12 @@ impl PsbtSighashMsg {
 mod tests {
     use std::str::FromStr;
 
-<<<<<<< HEAD
     use groestlcoin::bip32::{DerivationPath, ExtendedPubKey};
     use groestlcoin::consensus::encode::deserialize;
     use groestlcoin::hashes::hex::FromHex;
     use groestlcoin::key::XOnlyPublicKey;
     use groestlcoin::secp256k1::PublicKey;
     use groestlcoin::{absolute, OutPoint, TxIn, TxOut};
-=======
-    use bitcoin::bip32::{DerivationPath, ExtendedPubKey};
-    use bitcoin::consensus::encode::deserialize;
-    use bitcoin::hashes::hex::FromHex;
-    use bitcoin::key::XOnlyPublicKey;
-    use bitcoin::secp256k1::PublicKey;
-    use bitcoin::{absolute, OutPoint, TxIn, TxOut};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 
     use super::*;
     use crate::Miniscript;
@@ -1560,11 +1467,7 @@ mod tests {
     #[test]
     #[ignore]
     fn test_extract_bip174() {
-<<<<<<< HEAD
         let psbt = groestlcoin::psbt::PartiallySignedTransaction::deserialize(&Vec::<u8>::from_hex("70736274ff01009a020000000258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd750000000000ffffffff838d0427d0ec650a68aa46bb0b098aea4422c071b2ca78352a077959d07cea1d0100000000ffffffff0270aaf00800000000160014d85c2b71d0060b09c9886aeb815e50991dda124d00e1f5050000000016001400aea9a2e5f0f876a588df5546e8742d1d87008f00000000000100bb0200000001aad73931018bd25f84ae400b68848be09db706eac2ac18298babee71ab656f8b0000000048473044022058f6fc7c6a33e1b31548d481c826c015bd30135aad42cd67790dab66d2ad243b02204a1ced2604c6735b6393e5b41691dd78b00f0c5942fb9f751856faa938157dba01feffffff0280f0fa020000000017a9140fb9463421696b82c833af241c78c17ddbde493487d0f20a270100000017a91429ca74f8a08f81999428185c97b5d852e4063f6187650000000107da00473044022074018ad4180097b873323c0015720b3684cc8123891048e7dbcd9b55ad679c99022073d369b740e3eb53dcefa33823c8070514ca55a7dd9544f157c167913261118c01483045022100f61038b308dc1da865a34852746f015772934208c6d24454393cd99bdf2217770220056e675a675a6d0a02b85b14e5e29074d8a25a9b5760bea2816f661910a006ea01475221029583bf39ae0a609747ad199addd634fa6108559d6c5cd39b4c2183f1ab96e07f2102dab61ff49a14db6a7d02b0cd1fbb78fc4b18312b5b4e54dae4dba2fbfef536d752ae0001012000c2eb0b0000000017a914b7f5faf40e3d40a5a459b1db3535f2b72fa921e8870107232200208c2353173743b595dfb4a07b72ba8e42e3797da74e87fe7d9d7497e3b20289030108da0400473044022062eb7a556107a7c73f45ac4ab5a1dddf6f7075fb1275969a7f383efff784bcb202200c05dbb7470dbf2f08557dd356c7325c1ed30913e996cd3840945db12228da5f01473044022065f45ba5998b59a27ffe1a7bed016af1f1f90d54b3aa8f7450aa5f56a25103bd02207f724703ad1edb96680b284b56d4ffcb88f7fb759eabbe08aa30f29b851383d20147522103089dc10c7ac6db54f91329af617333db388cead0c231f723379d1b99030b02dc21023add904f3d6dcf59ddb906b0dee23529b7ffb9ed50e5e86151926860221f0e7352ae00220203a9a4c37f5996d3aa25dbac6b570af0650394492942460b354753ed9eeca5877110d90c6a4f000000800000008004000080002202027f6399757d2eff55a136ad02c684b1838b6556e5f1b6b34282a94b6b5005109610d90c6a4f00000080000000800500008000").unwrap()).unwrap();
-=======
-        let psbt = bitcoin::psbt::PartiallySignedTransaction::deserialize(&Vec::<u8>::from_hex("70736274ff01009a020000000258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd750000000000ffffffff838d0427d0ec650a68aa46bb0b098aea4422c071b2ca78352a077959d07cea1d0100000000ffffffff0270aaf00800000000160014d85c2b71d0060b09c9886aeb815e50991dda124d00e1f5050000000016001400aea9a2e5f0f876a588df5546e8742d1d87008f00000000000100bb0200000001aad73931018bd25f84ae400b68848be09db706eac2ac18298babee71ab656f8b0000000048473044022058f6fc7c6a33e1b31548d481c826c015bd30135aad42cd67790dab66d2ad243b02204a1ced2604c6735b6393e5b41691dd78b00f0c5942fb9f751856faa938157dba01feffffff0280f0fa020000000017a9140fb9463421696b82c833af241c78c17ddbde493487d0f20a270100000017a91429ca74f8a08f81999428185c97b5d852e4063f6187650000000107da00473044022074018ad4180097b873323c0015720b3684cc8123891048e7dbcd9b55ad679c99022073d369b740e3eb53dcefa33823c8070514ca55a7dd9544f157c167913261118c01483045022100f61038b308dc1da865a34852746f015772934208c6d24454393cd99bdf2217770220056e675a675a6d0a02b85b14e5e29074d8a25a9b5760bea2816f661910a006ea01475221029583bf39ae0a609747ad199addd634fa6108559d6c5cd39b4c2183f1ab96e07f2102dab61ff49a14db6a7d02b0cd1fbb78fc4b18312b5b4e54dae4dba2fbfef536d752ae0001012000c2eb0b0000000017a914b7f5faf40e3d40a5a459b1db3535f2b72fa921e8870107232200208c2353173743b595dfb4a07b72ba8e42e3797da74e87fe7d9d7497e3b20289030108da0400473044022062eb7a556107a7c73f45ac4ab5a1dddf6f7075fb1275969a7f383efff784bcb202200c05dbb7470dbf2f08557dd356c7325c1ed30913e996cd3840945db12228da5f01473044022065f45ba5998b59a27ffe1a7bed016af1f1f90d54b3aa8f7450aa5f56a25103bd02207f724703ad1edb96680b284b56d4ffcb88f7fb759eabbe08aa30f29b851383d20147522103089dc10c7ac6db54f91329af617333db388cead0c231f723379d1b99030b02dc21023add904f3d6dcf59ddb906b0dee23529b7ffb9ed50e5e86151926860221f0e7352ae00220203a9a4c37f5996d3aa25dbac6b570af0650394492942460b354753ed9eeca5877110d90c6a4f000000800000008004000080002202027f6399757d2eff55a136ad02c684b1838b6556e5f1b6b34282a94b6b5005109610d90c6a4f00000080000000800500008000").unwrap()).unwrap();
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         let secp = Secp256k1::verification_only();
         let tx = psbt.extract(&secp).unwrap();
         let expected: groestlcoin::Transaction = deserialize(&Vec::<u8>::from_hex("0200000000010258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd7500000000da00473044022074018ad4180097b873323c0015720b3684cc8123891048e7dbcd9b55ad679c99022073d369b740e3eb53dcefa33823c8070514ca55a7dd9544f157c167913261118c01483045022100f61038b308dc1da865a34852746f015772934208c6d24454393cd99bdf2217770220056e675a675a6d0a02b85b14e5e29074d8a25a9b5760bea2816f661910a006ea01475221029583bf39ae0a609747ad199addd634fa6108559d6c5cd39b4c2183f1ab96e07f2102dab61ff49a14db6a7d02b0cd1fbb78fc4b18312b5b4e54dae4dba2fbfef536d752aeffffffff838d0427d0ec650a68aa46bb0b098aea4422c071b2ca78352a077959d07cea1d01000000232200208c2353173743b595dfb4a07b72ba8e42e3797da74e87fe7d9d7497e3b2028903ffffffff0270aaf00800000000160014d85c2b71d0060b09c9886aeb815e50991dda124d00e1f5050000000016001400aea9a2e5f0f876a588df5546e8742d1d87008f000400473044022062eb7a556107a7c73f45ac4ab5a1dddf6f7075fb1275969a7f383efff784bcb202200c05dbb7470dbf2f08557dd356c7325c1ed30913e996cd3840945db12228da5f01473044022065f45ba5998b59a27ffe1a7bed016af1f1f90d54b3aa8f7450aa5f56a25103bd02207f724703ad1edb96680b284b56d4ffcb88f7fb759eabbe08aa30f29b851383d20147522103089dc10c7ac6db54f91329af617333db388cead0c231f723379d1b99030b02dc21023add904f3d6dcf59ddb906b0dee23529b7ffb9ed50e5e86151926860221f0e7352ae00000000").unwrap()).unwrap();

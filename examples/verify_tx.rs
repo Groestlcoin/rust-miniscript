@@ -16,15 +16,9 @@
 
 use std::str::FromStr;
 
-<<<<<<< HEAD
 use groestlcoin::consensus::Decodable;
 use groestlcoin::secp256k1::{self, Secp256k1};
 use groestlcoin::{absolute, sighash, Sequence};
-=======
-use bitcoin::consensus::Decodable;
-use bitcoin::secp256k1::{self, Secp256k1};
-use bitcoin::{absolute, sighash, Sequence};
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
 use miniscript::interpreter::KeySigPair;
 
 fn main() {
@@ -107,11 +101,7 @@ fn main() {
 
     let iter = interpreter.iter_custom(Box::new(|key_sig: &KeySigPair| {
         let (pk, ecdsa_sig) = key_sig.as_ecdsa().expect("Ecdsa Sig");
-<<<<<<< HEAD
         ecdsa_sig.hash_ty == groestlcoin::sighash::EcdsaSighashType::All
-=======
-        ecdsa_sig.hash_ty == bitcoin::sighash::EcdsaSighashType::All
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
             && secp
                 .verify_ecdsa(&message, &ecdsa_sig.sig, &pk.inner)
                 .is_ok()
@@ -185,13 +175,8 @@ fn hard_coded_transaction() -> groestlcoin::Transaction {
     groestlcoin::Transaction::consensus_decode(&mut &tx_bytes[..]).expect("decode transaction")
 }
 
-<<<<<<< HEAD
 fn hard_coded_script_pubkey() -> groestlcoin::ScriptBuf {
     groestlcoin::ScriptBuf::from(vec![
-=======
-fn hard_coded_script_pubkey() -> bitcoin::ScriptBuf {
-    bitcoin::ScriptBuf::from(vec![
->>>>>>> 7c28bd3 (Merge rust-bitcoin/rust-miniscript#537: update to bitcoin 0.30.0)
         0xa9, 0x14, 0x92, 0x09, 0xa8, 0xf9, 0x0c, 0x58, 0x4b, 0xb5, 0x97, 0x4d, 0x58, 0x68, 0x72,
         0x49, 0xe5, 0x32, 0xde, 0x59, 0xf4, 0xbc, 0x87,
     ])

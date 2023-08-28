@@ -26,8 +26,8 @@ if cargo --version | grep "1\.47\.0"; then
     cargo update -p serde --precise 1.0.156
 fi
 
-# Test bitcoind integration tests if told to (this only works with the stable toolchain)
-if [ "$DO_BITCOIND_TESTS" = true ]; then
+# Test groestlcoind integration tests if told to (this only works with the stable toolchain)
+if [ "$DO_GROESTLCOIND_TESTS" = true ]; then
     cd groestlcoind-tests
     GROESTLCOIND_EXE="$(git rev-parse --show-toplevel)/groestlcoind-tests/bin/groestlcoind" \
     cargo test --verbose
